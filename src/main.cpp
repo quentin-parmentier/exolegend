@@ -1,6 +1,17 @@
 #include "gladiator.h"
-#include <cmath>
+Gladiator *gladiator;
+
+#include <chrono>
+
 #undef abs
+
+const float CELL_SIZE = 3.0 / 14;
+const int MAZE_HEIGHT = 14;
+const int MAZE_LENGTH = 14;
+int ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
+int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
+const MazeSquare *maze[MAZE_HEIGHT][MAZE_LENGTH];
+const int TIME_FOR_NEW_WALL = 20;
 
 class Vector2
 {
@@ -41,8 +52,6 @@ private:
     float _x, _y;
 };
 
-const float CELL_SIZE = 3.0 / 14;
-
 class MyPosition
 {
 public:
@@ -52,8 +61,6 @@ public:
 private:
     float _x, _y;
 };
-
-Gladiator *gladiator;
 
 void reset()
 {
@@ -105,7 +112,7 @@ inline bool aim(Gladiator *gladiator, const Vector2 &target, bool showLogs)
 
     if (showLogs || targetReached)
     {
-        gladiator->log("ta %f, ca %f, ea %f, tx %f cx %f ex %f ty %f cy %f ey %f", targetAngle, posRaw.a, angleError, target.x(), pos.x(), posError.x(), target.y(), pos.y(), posError.y());
+        // gladiator->log("ta %f, ca %f, ea %f, tx %f cx %f ex %f ty %f cy %f ey %f", targetAngle, posRaw.a, angleError, target.x(), pos.x(), posError.x(), target.y(), pos.y(), posError.y());
     }
 
     return targetReached;
@@ -117,17 +124,60 @@ void setup()
     gladiator = new Gladiator();
     // enregistrement de la fonction de reset qui s'éxecute à chaque fois avant qu'une partie commence
     gladiator->game->onReset(&reset);
+
+    // On récupère tous les points
+    for (int x = 0; x < MAZE_LENGTH; x++)
+    {
+        for (int y = 0; y < MAZE_HEIGHT; y++)
+        {
+            maze[MAZE_LENGTH][MAZE_HEIGHT] = gladiator->maze->getSquare(x, y);
+        }
+    }
 }
+
+class Timer
+{
+private:
+    std::chrono::steady_clock::time_point lastTime;
+
+public:
+    Timer() : lastTime(std::chrono::steady_clock::now()) {}
+
+    bool hasElapsed()
+    {
+        auto currentTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - lastTime).count();
+        return elapsedTime >= TIME_FOR_NEW_WALL;
+    }
+
+    void reset()
+    {
+        lastTime = std::chrono::steady_clock::now();
+    }
+};
 
 void loop()
 {
     if (gladiator->game->isStarted())
     {
-        static unsigned i = 0;
-        bool showLogs = (i % 50 == 0);
+        static Timer timer = Timer();
+
+        if (timer.hasElapsed())
+        {
+            ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;
+            ACTUAL_MAZE_LENGTH = ACTUAL_MAZE_LENGTH - 2;
+            timer.reset();
+            gladiator->log("ça fait 20 secondes");
+        }
+        else
+        {
+            gladiator->log("Pas encore 20 secondes");
+        }
 
         MyPosition pos = MyPosition(5, 5);
 
+        static unsigned i = 0;
+        bool showLogs = (i % 50 == 0);
         if (aim(gladiator, pos.toVector(), showLogs))
         {
             gladiator->log("target atteinte !");
