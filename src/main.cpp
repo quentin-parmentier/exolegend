@@ -1,8 +1,11 @@
 #include "gladiator.h"
+#include "Vector2.hpp"
+#include "Navigation.hpp"
+
 // #include <random>
 #include <algorithm> // Pour std::copy
+#include <iostream>
 
-Gladiator *gladiator;
 RobotData currentRobotData;
 
 #include <chrono>
@@ -18,45 +21,6 @@ const MazeSquare *maze[MAZE_HEIGHT][MAZE_LENGTH];
 const int TIME_FOR_NEW_WALL = 20;
 const int DEPTH_WALKING = 5;
 
-class Vector2
-{
-public:
-    Vector2() : _x(0.), _y(0.) {}
-    Vector2(float x, float y) : _x(x), _y(y) {}
-
-    float norm1() const { return std::abs(_x) + std::abs(_y); }
-    float norm2() const { return std::sqrt(_x * _x + _y * _y); }
-    void normalize()
-    {
-        _x /= norm2();
-        _y /= norm2();
-    }
-    Vector2 normalized() const
-    {
-        Vector2 out = *this;
-        out.normalize();
-        return out;
-    }
-
-    Vector2 operator-(const Vector2 &other) const { return {_x - other._x, _y - other._y}; }
-    Vector2 operator+(const Vector2 &other) const { return {_x + other._x, _y + other._y}; }
-    Vector2 operator*(float f) const { return {_x * f, _y * f}; }
-
-    bool operator==(const Vector2 &other) const { return std::abs(_x - other._x) < 1e-5 && std::abs(_y - other._y) < 1e-5; }
-    bool operator!=(const Vector2 &other) const { return !(*this == other); }
-
-    float x() const { return _x; }
-    float y() const { return _y; }
-
-    float dot(const Vector2 &other) const { return _x * other._x + _y * other._y; }
-    float cross(const Vector2 &other) const { return _x * other._y - _y * other._x; }
-    float angle(const Vector2 &m) const { return std::atan2(cross(m), dot(m)); }
-    float angle() const { return std::atan2(_y, _x); }
-
-private:
-    float _x, _y;
-};
-
 class MyPosition
 {
 public:
@@ -70,6 +34,8 @@ private:
 };
 
 const MyPosition ROBOT_POSITION = MyPosition(0, 0); /// On peut peut être récupérer ça avec le Gladiator @todo
+Gladiator *gladiator;
+Navigation *navigation;
 
 void reset()
 {
@@ -126,6 +92,8 @@ inline bool aim(Gladiator *gladiator, const Vector2 &target, bool showLogs)
 
     return targetReached;
 }
+// Pour tester le robot, ne pas oublier de commenter pour les matchs !!!
+#define FREE_MODE
 
 void setup()
 {
@@ -134,6 +102,11 @@ void setup()
     // enregistrement de la fonction de reset qui s'éxecute à chaque fois avant qu'une partie commence
     gladiator->game->onReset(&reset);
     // gladiator->game->enableFreeMode(RemoteMode::OFF);
+    navigation = new Navigation(gladiator);
+
+    #ifdef FREE_MODE
+        gladiator->game->enableFreeMode(RemoteMode::OFF);
+    #endif
 
     // recuperer les informations du robot
     currentRobotData = gladiator->robot->getData();
@@ -231,7 +204,7 @@ int valueOfMS(const MazeSquare *ms, const bool throughWall)
         score += caseOustide;
 
     if (throughWall)
-        score += caseGoingThrougWall
+        score += caseGoingThrougWall;
 
             return score;
     /// Si la case est près d'un ennemie et qu'on a pas de roquette --
@@ -404,6 +377,14 @@ void getRandomPathing(Direction *directionTab)
 
 bool isFirst = true;
 
+MyPosition pos = MyPosition(1, 0);
+const Vector2 targets[] = {
+    Vector2(0., .5),
+    Vector2(.5, .5),
+    Vector2(.5, 0.),
+    Vector2(0., 0.),
+};
+
 void loop()
 {
     if (isFirst)
@@ -466,5 +447,26 @@ void loop()
         }
         i++;
     }
+
+    static unsigned i = 0;
+    bool showLogs = (i % 50 == 0);
+    static int currentTargetIndex = 0;
+
+    #ifdef FREE_MODE
+        if (navigation->driveTo(targets[currentTargetIndex], showLogs) == NAVIGATION_TARGET_STATE::REACHED) {
+            gladiator->log("Target %d reached", currentTargetIndex);
+            currentTargetIndex = (currentTargetIndex + 1) % (sizeof(targets) / sizeof(Vector2));
+        }
+    #else 
+        if (gladiator->game->isStarted())
+        {
+
+            if (aim(gladiator, pos.toVector(), showLogs))
+            {
+                gladiator->log("target atteinte !");
+            }
+            i++;
+        }
+    #endif
     delay(10); // boucle à 100Hz
 }
