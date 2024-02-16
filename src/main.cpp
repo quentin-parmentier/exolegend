@@ -1,37 +1,24 @@
 #include "gladiator.h"
 #include "Vector2.hpp"
 #include "Navigation.hpp"
+#include "utils.hpp"
 
 // #include <random>
 #include <algorithm> // Pour std::copy
 #include <iostream>
+#include "MyPosition.hpp"
+#include "Timer.hpp"
 
 RobotData currentRobotData;
 
-#include <chrono>
-
 #undef abs
 
-const float CELL_SIZE = 3.0 / 12;
 const int MAZE_HEIGHT = 12;
 const int MAZE_LENGTH = 12;
 int ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
 int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
 const MazeSquare *maze[MAZE_HEIGHT][MAZE_LENGTH];
-const int TIME_FOR_NEW_WALL = 20;
 const int DEPTH_WALKING = 5;
-
-class MyPosition
-{
-public:
-    MyPosition(int x, int y) : _x(x), _y(y) {}
-    Vector2 toVector() const { return Vector2(_x * CELL_SIZE + 0.5 * CELL_SIZE, _y * CELL_SIZE + 0.5 * CELL_SIZE); }
-    int getX() const { return _x; }
-    int getY() const { return _y; }
-
-private:
-    int _x, _y;
-};
 
 const MyPosition ROBOT_POSITION = MyPosition(0, 0); /// On peut peut être récupérer ça avec le Gladiator @todo
 Gladiator *gladiator;
@@ -41,59 +28,8 @@ void reset()
 {
 }
 
-inline float moduloPi(float a) // return angle in [-pi; pi]
-{
-    return (a < 0.0) ? (std::fmod(a - M_PI, 2 * M_PI) + M_PI) : (std::fmod(a + M_PI, 2 * M_PI) - M_PI);
-}
-
-inline bool aim(Gladiator *gladiator, const Vector2 &target, bool showLogs)
-{
-    constexpr float ANGLE_REACHED_THRESHOLD = 0.1;
-    constexpr float POS_REACHED_THRESHOLD = 0.05;
-
-    auto posRaw = gladiator->robot->getData().position;
-    Vector2 pos{posRaw.x, posRaw.y};
-
-    Vector2 posError = target - pos;
-
-    float targetAngle = posError.angle();
-    float angleError = moduloPi(targetAngle - posRaw.a);
-
-    bool targetReached = false;
-    float leftCommand = 0.f;
-    float rightCommand = 0.f;
-
-    if (posError.norm2() < POS_REACHED_THRESHOLD) //
-    {
-        targetReached = true;
-    }
-    else if (std::abs(angleError) > ANGLE_REACHED_THRESHOLD)
-    {
-        float factor = 0.2;
-        if (angleError < 0)
-            factor = -factor;
-        rightCommand = factor;
-        leftCommand = -factor;
-    }
-    else
-    {
-        float factor = 0.5;
-        rightCommand = factor; //+angleError*0.1  => terme optionel, "pseudo correction angulaire";
-        leftCommand = factor;  //-angleError*0.1   => terme optionel, "pseudo correction angulaire";
-    }
-
-    gladiator->control->setWheelSpeed(WheelAxis::LEFT, leftCommand);
-    gladiator->control->setWheelSpeed(WheelAxis::RIGHT, rightCommand);
-
-    if (showLogs || targetReached)
-    {
-        // gladiator->log("ta %f, ca %f, ea %f, tx %f cx %f ex %f ty %f cy %f ey %f", targetAngle, posRaw.a, angleError, target.x(), pos.x(), posError.x(), target.y(), pos.y(), posError.y());
-    }
-
-    return targetReached;
-}
 // Pour tester le robot, ne pas oublier de commenter pour les matchs !!!
-#define FREE_MODE
+//#define FREE_MODE
 
 void setup()
 {
@@ -111,27 +47,6 @@ void setup()
     // recuperer les informations du robot
     currentRobotData = gladiator->robot->getData();
 }
-
-class Timer
-{
-private:
-    std::chrono::steady_clock::time_point lastTime;
-
-public:
-    Timer() : lastTime(std::chrono::steady_clock::now()) {}
-
-    bool hasElapsed()
-    {
-        auto currentTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - lastTime).count();
-        return elapsedTime >= TIME_FOR_NEW_WALL;
-    }
-
-    void reset()
-    {
-        lastTime = std::chrono::steady_clock::now();
-    }
-};
 
 bool isOnMazeBorder(int i, int j)
 {
@@ -441,10 +356,7 @@ void loop()
 
         static unsigned i = 0;
         bool showLogs = (i % 50 == 0);
-        if (aim(gladiator, pos.toVector(), showLogs))
-        {
-            // gladiator->log("target atteinte !");
-        }
+
         i++;
     }
 
@@ -460,12 +372,7 @@ void loop()
     #else 
         if (gladiator->game->isStarted())
         {
-
-            if (aim(gladiator, pos.toVector(), showLogs))
-            {
-                gladiator->log("target atteinte !");
-            }
-            i++;
+            // TODO : gagner
         }
     #endif
     delay(10); // boucle à 100Hz
