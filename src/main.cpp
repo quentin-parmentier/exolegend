@@ -1,4 +1,7 @@
 #include "gladiator.h"
+// #include <random>
+#include <algorithm> // Pour std::copy
+
 Gladiator *gladiator;
 RobotData currentRobotData;
 
@@ -57,12 +60,16 @@ private:
 class MyPosition
 {
 public:
-    MyPosition(float x, float y) : _x(x), _y(y) {}
+    MyPosition(int x, int y) : _x(x), _y(y) {}
     Vector2 toVector() const { return Vector2(_x * CELL_SIZE + 0.5 * CELL_SIZE, _y * CELL_SIZE + 0.5 * CELL_SIZE); }
+    int getX() const { return _x; }
+    int getY() const { return _y; }
 
 private:
-    float _x, _y;
+    int _x, _y;
 };
+
+const MyPosition ROBOT_POSITION = MyPosition(0, 0); /// On peut peut être récupérer ça avec le Gladiator @todo
 
 void reset()
 {
@@ -162,22 +169,34 @@ public:
     }
 };
 
-bool isOnMazeBorder(int i, int j){
-    if(i == (MAZE_LENGTH - ACTUAL_MAZE_LENGTH)/2 || i == ACTUAL_MAZE_LENGTH + (MAZE_LENGTH - ACTUAL_MAZE_LENGTH)/2 -1  ){
+bool isOnMazeBorder(int i, int j)
+{
+    if (i == (MAZE_LENGTH - ACTUAL_MAZE_LENGTH) / 2 || i == ACTUAL_MAZE_LENGTH + (MAZE_LENGTH - ACTUAL_MAZE_LENGTH) / 2 - 1)
+    {
         return true;
-    }else if(j == (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT)/2 || j == ACTUAL_MAZE_HEIGHT + (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT)/2 -1 ){
+    }
+    else if (j == (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT) / 2 || j == ACTUAL_MAZE_HEIGHT + (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT) / 2 - 1)
+    {
         return true;
-    }else{
+    }
+    else
+    {
         return false;
     }
 }
 
-bool isOutside(int i, int j){
-    if(i < (MAZE_LENGTH - ACTUAL_MAZE_LENGTH)/2 || i >= ACTUAL_MAZE_LENGTH + (MAZE_LENGTH - ACTUAL_MAZE_LENGTH)/2 -1  ){
+bool isOutside(int i, int j)
+{
+    if (i < (MAZE_LENGTH - ACTUAL_MAZE_LENGTH) / 2 || i >= ACTUAL_MAZE_LENGTH + (MAZE_LENGTH - ACTUAL_MAZE_LENGTH) / 2 - 1)
+    {
         return true;
-    }else if(j < (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT)/2 || j >= ACTUAL_MAZE_HEIGHT + (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT)/2 -1 ){
+    }
+    else if (j < (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT) / 2 || j >= ACTUAL_MAZE_HEIGHT + (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT) / 2 - 1)
+    {
         return true;
-    }else{
+    }
+    else
+    {
         return false;
     }
 }
@@ -191,25 +210,34 @@ int valueOfMS(const MazeSquare *ms)
     const int caseDanger = -20;
     const int caseNeutre = 10;
     const int caseBorder = 15;
-    const int caseOustide = 50; 
+    const int caseOustide = 50;
     /// Si la case a une roquette ++
-    if((ms->coin).value) score += caseRoquette;
+    if ((ms->coin).value)
+        score += caseRoquette;
     /// si case en danger --
-    if(ms->danger) score += caseDanger;
+    if (ms->danger)
+        score += caseDanger;
     /// si case est vide ++
-    if(ms->possession == 0 ) score += caseNeutre;
+    if (ms->possession == 0)
+        score += caseNeutre;
     /// Si la case est à nous --
-    else if(ms->possession == currentRobotData.teamId ) score += caseEquipe;
+    else if (ms->possession == currentRobotData.teamId)
+        score += caseEquipe;
     /// Si la case est aux autre ++
-    else score += caseAdverse;
+    else
+        score += caseAdverse;
     /// Si la case est sur le bord du maze
-    if(isOnMazeBorder(ms->i, ms->j)) score += caseBorder;
+    if (isOnMazeBorder(ms->i, ms->j))
+        score += caseBorder;
 
-    if(isOutside(ms->i, ms->j)) score += caseOustide;
+    if (isOutside(ms->i, ms->j))
+        score += caseOustide;
 
     return score;
     /// Si la case est près d'un ennemie et qu'on a pas de roquette --
     /// Si la case est près d'un ennemie (en ligne droite) et qu'on a une roquette ++
+
+    return 1;
 }
 
 int costOfMS(MazeSquare ms)
@@ -220,10 +248,109 @@ int costOfMS(MazeSquare ms)
     /// On peut se dire qu'aller dans le même sens que ce qu'on a déjà coute moins cher que de tourner et encore moins cher qu'un demi tour
 }
 
+enum Direction
+{
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM,
+};
+
+Direction getRandomDirection()
+{
+    int8_t rand_index = random() % 4;
+
+    gladiator->log("RANDOM: %d", rand_index);
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+    // std::uniform_int_distribution<> dis(0, static_cast<int>(Direction::BOTTOM));
+    //
+    //// Génération d'un nombre aléatoire entre 0 et 3
+    // int randomIndex = dis(gen);
+
+    // Sélection aléatoire d'une valeur de l'énuméré
+    return static_cast<Direction>(rand_index);
+}
+
+MyPosition getNextCase(Direction direction, MyPosition position)
+{
+    return position;
+}
+
+Direction actualDirection = Direction::LEFT;
+
+void getRandomPathing(Direction *directionTab)
+{
+    const int numberOfTry = 10;
+    int maxScore = 0;
+    Direction directions[DEPTH_WALKING] = {};
+
+    for (int i = 0; i < numberOfTry; i++)
+    {
+        int scoreOfTry = 0;
+        Direction directionsOfTry[DEPTH_WALKING] = {};
+        MyPosition robotPosition = ROBOT_POSITION;
+        /// On tente d'avoir un parcours cool
+        for (size_t j = 0; j < DEPTH_WALKING; j++)
+        {
+            /// On récupère une position random pour calculer sa valeur
+            const Direction nextDirection = getRandomDirection();
+
+            /// On ne peut pas forcément annuler le fait d'aller dans un mur parce que parfois ça sera la meilleure chose à faire
+            /// Regarder si on est bloqué pour traverser un mur parce que la meilleure solution peut être de ne rien faire !
+            const MyPosition nextPosition = getNextCase(nextDirection, robotPosition);
+            const int x = nextPosition.getX();
+            const int y = nextPosition.getY();
+
+            /// On récupère le prochain MazeSquare
+            const int valueOfNextMazeSquare = valueOfMS(maze[x][y]);
+
+            /// On update
+            robotPosition = nextPosition;
+            scoreOfTry += valueOfNextMazeSquare;
+            directionsOfTry[j] = nextDirection;
+
+            gladiator->log("NEXT %d", nextDirection);
+        }
+
+        if (maxScore < scoreOfTry)
+        {
+            maxScore = scoreOfTry;
+            std::copy(std::begin(directionsOfTry), std::end(directionsOfTry), std::begin(directions));
+        }
+    }
+
+    for (size_t i = 0; i < DEPTH_WALKING; i++)
+    {
+        directionTab[i] = directions[i];
+    }
+}
+
+bool isTest = true;
+
 void loop()
 {
+
+    if (isTest)
+    {
+        isTest = false;
+        Direction direction[DEPTH_WALKING] = {};
+
+        getRandomPathing(direction);
+
+        for (size_t i = 0; i < DEPTH_WALKING; i++)
+        {
+            std::cout << "Valeur de Direction : " << static_cast<int>(direction[i]) << std::endl;
+            gladiator->log("PATH : %d", direction[i]);
+        }
+    }
+
     if (gladiator->game->isStarted())
     {
+        /// On set la vrai direction du robot
+        /// actualDirection = Direction::?? @todo
+        /// ROBOT_POSITION aussi : @todo
+
         static Timer timer = Timer();
 
         if (timer.hasElapsed())
