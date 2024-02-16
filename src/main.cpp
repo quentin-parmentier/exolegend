@@ -12,7 +12,7 @@ int ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
 int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
 const MazeSquare *maze[MAZE_HEIGHT][MAZE_LENGTH];
 const int TIME_FOR_NEW_WALL = 20;
-
+const int DEPTH_WALKING = 5;
 class Vector2
 {
 public:
@@ -155,6 +155,24 @@ public:
         lastTime = std::chrono::steady_clock::now();
     }
 };
+
+int valueOfMS(MazeSquare ms)
+{
+    /// Si la case est sur le côté ++
+    /// Si la case a une roquette ++
+    /// Si la case est à nous --
+    /// Si la case est aux autre ++
+    /// Si la case est près d'un ennemie et qu'on a pas de roquette --
+    /// Si la case est près d'un ennemie (en ligne droite) et qu'on a une roquette ++
+}
+
+int costOfMS(MazeSquare ms)
+{
+    /// Pour l'instant on ignore les couts
+    return 1;
+
+    /// On peut se dire qu'aller dans le même sens que ce qu'on a déjà coute moins cher que de tourner et encore moins cher qu'un demi tour
+}
 
 void loop()
 {
