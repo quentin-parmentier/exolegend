@@ -1,5 +1,6 @@
 #include "gladiator.h"
 Gladiator *gladiator;
+RobotData currentRobotData;
 
 #include <chrono>
 
@@ -13,6 +14,7 @@ int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
 const MazeSquare *maze[MAZE_HEIGHT][MAZE_LENGTH];
 const int TIME_FOR_NEW_WALL = 20;
 const int DEPTH_WALKING = 5;
+
 class Vector2
 {
 public:
@@ -124,6 +126,7 @@ void setup()
     gladiator = new Gladiator();
     // enregistrement de la fonction de reset qui s'éxecute à chaque fois avant qu'une partie commence
     gladiator->game->onReset(&reset);
+    // gladiator->game->enableFreeMode(RemoteMode::OFF);
 
     // On récupère tous les points
     for (int x = 0; x < MAZE_LENGTH; x++)
@@ -133,6 +136,9 @@ void setup()
             maze[MAZE_LENGTH][MAZE_HEIGHT] = gladiator->maze->getSquare(x, y);
         }
     }
+
+    // recuperer les informations du robot
+    currentRobotData = gladiator->robot->getData();
 }
 
 class Timer
@@ -156,12 +162,52 @@ public:
     }
 };
 
-int valueOfMS(MazeSquare ms)
+bool isOnMazeBorder(int i, int j){
+    if(i == (MAZE_LENGTH - ACTUAL_MAZE_LENGTH)/2 || i == ACTUAL_MAZE_LENGTH + (MAZE_LENGTH - ACTUAL_MAZE_LENGTH)/2 -1  ){
+        return true;
+    }else if(j == (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT)/2 || j == ACTUAL_MAZE_HEIGHT + (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT)/2 -1 ){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+bool isOutside(int i, int j){
+    if(i < (MAZE_LENGTH - ACTUAL_MAZE_LENGTH)/2 || i >= ACTUAL_MAZE_LENGTH + (MAZE_LENGTH - ACTUAL_MAZE_LENGTH)/2 -1  ){
+        return true;
+    }else if(j < (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT)/2 || j >= ACTUAL_MAZE_HEIGHT + (MAZE_HEIGHT - ACTUAL_MAZE_HEIGHT)/2 -1 ){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+int valueOfMS(const MazeSquare *ms)
 {
-    /// Si la case est sur le côté ++
+    int score = 0;
+    const int caseAdverse = 15;
+    const int caseEquipe = 0;
+    const int caseRoquette = 20;
+    const int caseDanger = -20;
+    const int caseNeutre = 10;
+    const int caseBorder = 15;
+    const int caseOustide = 50; 
     /// Si la case a une roquette ++
+    if((ms->coin).value) score += caseRoquette;
+    /// si case en danger --
+    if(ms->danger) score += caseDanger;
+    /// si case est vide ++
+    if(ms->possession == 0 ) score += caseNeutre;
     /// Si la case est à nous --
+    else if(ms->possession == currentRobotData.teamId ) score += caseEquipe;
     /// Si la case est aux autre ++
+    else score += caseAdverse;
+    /// Si la case est sur le bord du maze
+    if(isOnMazeBorder(ms->i, ms->j)) score += caseBorder;
+
+    if(isOutside(ms->i, ms->j)) score += caseOustide;
+
+    return score;
     /// Si la case est près d'un ennemie et qu'on a pas de roquette --
     /// Si la case est près d'un ennemie (en ligne droite) et qu'on a une roquette ++
 }
