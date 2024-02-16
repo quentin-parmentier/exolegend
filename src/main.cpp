@@ -9,9 +9,9 @@ RobotData currentRobotData;
 
 #undef abs
 
-const float CELL_SIZE = 3.0 / 14;
-const int MAZE_HEIGHT = 14;
-const int MAZE_LENGTH = 14;
+const float CELL_SIZE = 3.0 / 12;
+const int MAZE_HEIGHT = 12;
+const int MAZE_LENGTH = 12;
 int ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
 int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
 const MazeSquare *maze[MAZE_HEIGHT][MAZE_LENGTH];
@@ -135,15 +135,6 @@ void setup()
     gladiator->game->onReset(&reset);
     // gladiator->game->enableFreeMode(RemoteMode::OFF);
 
-    // On récupère tous les points
-    for (int x = 0; x < MAZE_LENGTH; x++)
-    {
-        for (int y = 0; y < MAZE_HEIGHT; y++)
-        {
-            maze[MAZE_LENGTH][MAZE_HEIGHT] = gladiator->maze->getSquare(x, y);
-        }
-    }
-
     // recuperer les informations du robot
     currentRobotData = gladiator->robot->getData();
 }
@@ -201,19 +192,25 @@ bool isOutside(int i, int j)
     }
 }
 
-int valueOfMS(const MazeSquare *ms)
+int valueOfMS(const MazeSquare *ms, const bool throughWall)
 {
+    // return 1;
     int score = 0;
+
     const int caseAdverse = 15;
     const int caseEquipe = 0;
     const int caseRoquette = 20;
     const int caseDanger = -20;
     const int caseNeutre = 10;
-    const int caseBorder = 15;
-    const int caseOustide = 50;
+    const int caseBorder = 20;
+    const int caseOustide = -500;
+    const int caseGoingThrougWall = -40;
+
     /// Si la case a une roquette ++
     if ((ms->coin).value)
+    {
         score += caseRoquette;
+    }
     /// si case en danger --
     if (ms->danger)
         score += caseDanger;
@@ -233,7 +230,10 @@ int valueOfMS(const MazeSquare *ms)
     if (isOutside(ms->i, ms->j))
         score += caseOustide;
 
-    return score;
+    if (throughWall)
+        score += caseGoingThrougWall
+
+            return score;
     /// Si la case est près d'un ennemie et qu'on a pas de roquette --
     /// Si la case est près d'un ennemie (en ligne droite) et qu'on a une roquette ++
 
@@ -261,12 +261,6 @@ Direction getRandomDirection()
     int8_t rand_index = random() % 4;
 
     gladiator->log("RANDOM: %d", rand_index);
-    // std::random_device rd;
-    // std::mt19937 gen(rd());
-    // std::uniform_int_distribution<> dis(0, static_cast<int>(Direction::BOTTOM));
-    //
-    //// Génération d'un nombre aléatoire entre 0 et 3
-    // int randomIndex = dis(gen);
 
     // Sélection aléatoire d'une valeur de l'énuméré
     return static_cast<Direction>(rand_index);
@@ -274,7 +268,69 @@ Direction getRandomDirection()
 
 MyPosition getNextCase(Direction direction, MyPosition position)
 {
+    /// On récupère la position d'après
     return position;
+}
+
+bool goingThroughWall(Direction direction, const MazeSquare *mazeSquare)
+{
+    bool isGoingThroughWall = false;
+
+    if (mazeSquare == nullptr)
+    {
+        gladiator->log("On fait de la merde");
+    }
+
+    if (direction == Direction::TOP)
+    {
+        gladiator->log("TOP");
+        if (mazeSquare != nullptr && mazeSquare->northSquare == nullptr)
+        {
+            gladiator->log("TOP");
+            return true;
+        }
+
+        return false;
+    }
+
+    if (direction == Direction::LEFT)
+    {
+        gladiator->log("LEFT");
+        if (mazeSquare != nullptr && mazeSquare->westSquare == nullptr)
+        {
+            gladiator->log("LEFT");
+            return true;
+        }
+
+        return false;
+    }
+
+    if (direction == Direction::BOTTOM)
+    {
+        gladiator->log("BOTTOM");
+        if (mazeSquare != nullptr && mazeSquare->southSquare == nullptr)
+        {
+            gladiator->log("BOTTOM");
+            return true;
+        }
+
+        return false;
+    }
+
+    if (direction == Direction::RIGHT)
+    {
+        gladiator->log("RIGHT");
+        if (mazeSquare != nullptr && mazeSquare->eastSquare == nullptr)
+        {
+            gladiator->log("RIGHT");
+            return true;
+        }
+
+        return false;
+    }
+
+    gladiator->log("Traverse pas de mur");
+    return isGoingThroughWall;
 }
 
 Direction actualDirection = Direction::LEFT;
@@ -289,7 +345,7 @@ void getRandomPathing(Direction *directionTab)
     {
         int scoreOfTry = 0;
         Direction directionsOfTry[DEPTH_WALKING] = {};
-        MyPosition robotPosition = ROBOT_POSITION;
+        MyPosition actualPosition = ROBOT_POSITION;
         /// On tente d'avoir un parcours cool
         for (size_t j = 0; j < DEPTH_WALKING; j++)
         {
@@ -298,15 +354,31 @@ void getRandomPathing(Direction *directionTab)
 
             /// On ne peut pas forcément annuler le fait d'aller dans un mur parce que parfois ça sera la meilleure chose à faire
             /// Regarder si on est bloqué pour traverser un mur parce que la meilleure solution peut être de ne rien faire !
-            const MyPosition nextPosition = getNextCase(nextDirection, robotPosition);
+            const MyPosition nextPosition = getNextCase(nextDirection, actualPosition);
             const int x = nextPosition.getX();
             const int y = nextPosition.getY();
 
+            gladiator->log("Next x : %d, Next y : %d", x, y);
+
+            const int actualX = actualPosition.getX();
+            const int actualY = actualPosition.getY();
+
+            gladiator->log("Actual x : %d, Actual y : %d", actualX, actualY);
+
+            const MazeSquare *nextMazeSquare = maze[x][y];
+            const MazeSquare *actualMazeSquare = maze[actualX][actualY];
+
+            const bool isGoingThroughWall = goingThroughWall(nextDirection, actualMazeSquare);
+
+            gladiator->log("Though wall : %d", isGoingThroughWall);
+
             /// On récupère le prochain MazeSquare
-            const int valueOfNextMazeSquare = valueOfMS(maze[x][y]);
+            const int valueOfNextMazeSquare = valueOfMS(nextMazeSquare, isGoingThroughWall);
+
+            gladiator->log("VALEUR: %d", valueOfNextMazeSquare);
 
             /// On update
-            robotPosition = nextPosition;
+            actualPosition = nextPosition;
             scoreOfTry += valueOfNextMazeSquare;
             directionsOfTry[j] = nextDirection;
 
@@ -316,7 +388,11 @@ void getRandomPathing(Direction *directionTab)
         if (maxScore < scoreOfTry)
         {
             maxScore = scoreOfTry;
-            std::copy(std::begin(directionsOfTry), std::end(directionsOfTry), std::begin(directions));
+            for (size_t i = 0; i < DEPTH_WALKING; i++)
+            {
+                directions[i] = directionsOfTry[i];
+            }
+            // std::copy(std::begin(directionsOfTry), std::end(directionsOfTry), std::begin(directions));
         }
     }
 
@@ -326,14 +402,29 @@ void getRandomPathing(Direction *directionTab)
     }
 }
 
-bool isTest = true;
+bool isFirst = true;
 
 void loop()
 {
-
-    if (isTest)
+    if (isFirst)
     {
-        isTest = false;
+        if (gladiator->maze == nullptr)
+        {
+            gladiator->log("MAZE EST NULL");
+        }
+
+        // On récupère tous les points
+        for (int x = 0; x < MAZE_LENGTH; x++)
+        {
+            for (int y = 0; y < MAZE_HEIGHT; y++)
+            {
+                const MazeSquare *msq = gladiator->maze->getSquare(x, y);
+                maze[x][y] = msq;
+            }
+        }
+
+        gladiator->log("STRAT TEST");
+        isFirst = false;
         Direction direction[DEPTH_WALKING] = {};
 
         getRandomPathing(direction);
@@ -358,11 +449,11 @@ void loop()
             ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;
             ACTUAL_MAZE_LENGTH = ACTUAL_MAZE_LENGTH - 2;
             timer.reset();
-            gladiator->log("ça fait 20 secondes");
+            // gladiator->log("ça fait 20 secondes");
         }
         else
         {
-            gladiator->log("Pas encore 20 secondes");
+            // gladiator->log("Pas encore 20 secondes");
         }
 
         MyPosition pos = MyPosition(5, 5);
@@ -371,7 +462,7 @@ void loop()
         bool showLogs = (i % 50 == 0);
         if (aim(gladiator, pos.toVector(), showLogs))
         {
-            gladiator->log("target atteinte !");
+            // gladiator->log("target atteinte !");
         }
         i++;
     }
