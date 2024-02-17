@@ -13,6 +13,7 @@ public:
     Vector2 toVector() const;
     int getX() const;
     int getY() const;
+    void copy(MyPosition p);
 
 private:
     int _x, _y;

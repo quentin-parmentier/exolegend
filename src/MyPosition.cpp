@@ -8,3 +8,8 @@ Vector2 MyPosition::toVector() const { return Vector2(_x * CELL_SIZE + 0.5 * CEL
 int MyPosition::getX() const { return _x; }
 
 int MyPosition::getY() const { return _y; }
+
+void MyPosition::copy(MyPosition p) {
+    _x = p.getX();
+    _y = p.getY();
+}
