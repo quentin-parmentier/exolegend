@@ -109,43 +109,46 @@ void loop()
     i++;
 #else
     static Timer timer = Timer();
-
-    if (timer.hasElapsed())
+    if (gladiator->game->isStarted())
     {
-        ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;
-        ACTUAL_MAZE_LENGTH = ACTUAL_MAZE_LENGTH - 2;
-        timer.reset();
 
-        /// Notre stack n'est plus bonne on la reset
-        navigationStack->reset();
-
-        /// On se sauve le cul si jamais on est pas dedans 1s avant
-
-        /// On recréer notre liste comme il faut
-        const MazeSquare *initialMazeSquare = gladiator->maze->getNearestSquare();
-        const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
-        gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
-        navigationStrategy->computeRandomPathing(actualRobotPosition);
-    }
-    else
-    {
-        /// On va vers la position qu'on vire
-        NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(actualPositionToFind.toVector(gladiator->maze->getSquareSize()));
-
-        if (showLogs)
+        if (timer.hasElapsed())
         {
-            gladiator->log("Position visée %d:%d", actualPositionToFind.getX(), actualPositionToFind.getY());
+            ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;
+            ACTUAL_MAZE_LENGTH = ACTUAL_MAZE_LENGTH - 2;
+            timer.reset();
+
+            /// Notre stack n'est plus bonne on la reset
+            navigationStack->reset();
+
+            /// On se sauve le cul si jamais on est pas dedans 1s avant
+
+            /// On recréer notre liste comme il faut
+            const MazeSquare *initialMazeSquare = gladiator->maze->getNearestSquare();
+            const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
+            gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
+            navigationStrategy->computeRandomPathing(actualRobotPosition);
         }
-
-        /// On attend de voir si on est arrivé pour redonner la prochaine case
-        if (navigationState == NAVIGATION_TARGET_STATE::REACHED)
+        else
         {
-            gladiator->log("Target %d:%d reached", actualPositionToFind.getX(), actualPositionToFind.getY());
+            /// On va vers la position qu'on vire
+            NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(actualPositionToFind.toVector(gladiator->maze->getSquareSize()));
 
-            /// On regarde la prochaine position à aller voir
-            actualPositionToFind = navigationStack->shift();
-            MyPosition *positionOnTop = navigationStack->getPositionOnTop();
-            navigationStrategy->computeRandomPathing(*positionOnTop);
+            if (showLogs)
+            {
+                gladiator->log("Position visée %d:%d", actualPositionToFind.getX(), actualPositionToFind.getY());
+            }
+
+            /// On attend de voir si on est arrivé pour redonner la prochaine case
+            if (navigationState == NAVIGATION_TARGET_STATE::REACHED)
+            {
+                gladiator->log("Target %d:%d reached", actualPositionToFind.getX(), actualPositionToFind.getY());
+
+                /// On regarde la prochaine position à aller voir
+                actualPositionToFind = navigationStack->shift();
+                MyPosition *positionOnTop = navigationStack->getPositionOnTop();
+                navigationStrategy->computeRandomPathing(*positionOnTop);
+            }
         }
     }
 #endif
