@@ -42,6 +42,8 @@ Direction actualDirection = Direction::LEFT;
 void reset()
 {
     navigationStack->reset();
+    ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
+    ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
     // On récupère tous les points
     for (int x = 0; x < MAZE_LENGTH; x++)
     {
