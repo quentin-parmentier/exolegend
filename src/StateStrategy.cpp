@@ -1,9 +1,12 @@
 #include "StateStrategy.hpp"
 #include "MyPosition.hpp"
+#include "utils.hpp"
 
-StateStrategy::StateStrategy(STATE baseState, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy) : state(baseState), navigation(navigation),
-                                                                                                                                                                        navigationStack(navigationStack),
-                                                                                                                                                                        gladiator(gladiator), navigationStrategy(navigationStrategy)
+StateStrategy::StateStrategy(STATE baseState, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength) : state(baseState), navigation(navigation),
+                                                                                                                                                                                                                                                          navigationStack(navigationStack),
+                                                                                                                                                                                                                                                          gladiator(gladiator), navigationStrategy(navigationStrategy), mazeHeight(mazeHeight),
+                                                                                                                                                                                                                                                          mazeLength(mazeLength), originalMazeHeight(originalMazeHeight),
+                                                                                                                                                                                                                                                          originalMazeLength(originalMazeLength)
 {
     actualPositionToFind = MyPosition();
 };
@@ -17,11 +20,17 @@ void StateStrategy::resetBasicStrategy()
     const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
     gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
     navigationStrategy->computeRandomPathing(actualRobotPosition);
+
+    // state = STATE::BASIC; ?? @todo
 }
 
-void StateStrategy::next()
+void StateStrategy::next(bool mazeWillShrink)
 {
     /// On fait les différents checks
+    if (mazeWillShrink && shouldSaveMyAss())
+    {
+        state = STATE::SAVE;
+    }
 
     /// On fait l'action en fonction de l'état
     if (state == STATE::BASIC)
@@ -55,7 +64,9 @@ void StateStrategy::useBasicStrategy()
 };
 
 void StateStrategy::useSaveStrategy(){
+    /// On trouve la case la plus proche
 
+    /// On y va à pleine balle tout droit
 };
 
 void StateStrategy::useRocketStrategy(){
@@ -63,3 +74,13 @@ void StateStrategy::useRocketStrategy(){
         gladiator->weapon->launchRocket();
     }
 };
+
+bool StateStrategy::shouldSaveMyAss()
+{
+    const MazeSquare *msq = gladiator->maze->getNearestSquare();
+    /// Est-ce qu'on va être en dehors des limites ?
+    /// -2 parce qu'on fait comme si y'avait
+    // int mazeHeight = (*mazeHeight - 2);
+    // int mazeLength = (*mazeLength - 2);
+    // return checkIfIsOutside(msq->i, msq->j, originalMazeHeight, originalMazeLength, &mazeHeight, &mazeLength);
+}

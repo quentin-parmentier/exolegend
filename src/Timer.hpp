@@ -3,7 +3,8 @@
 
 #include <chrono>
 
-const int TIME_FOR_NEW_WALL = 19;
+const int TIME_FOR_NEW_WALL = 20;
+const int TIME_FOR_SAVE = 18;
 
 class Timer
 {
@@ -13,6 +14,7 @@ private:
 public:
     Timer();
     bool hasElapsed();
+    bool mightSaveHisAss();
 
     void reset();
 };

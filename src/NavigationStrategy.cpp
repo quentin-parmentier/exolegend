@@ -1,4 +1,5 @@
 #include "NavigationStrategy.hpp"
+#include "utils.hpp"
 
 NavigationStrategy::NavigationStrategy(NavigationStack *navigationStack, Gladiator *gladiator, int depthWalking, const MazeSquare ***maze, int *mazeHeight, int *mazeLength, int originalMazeHeight, int originalMazeLength)
     : navigationStack(navigationStack), gladiator(gladiator), depthWalking(depthWalking), maze(maze), mazeHeight(mazeHeight), mazeLength(mazeLength), originalMazeHeight(originalMazeHeight), originalMazeLength(originalMazeLength)
@@ -86,7 +87,6 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
     }
 
     navigationStack->simplify();
-    navigationStack->printTab();
 }
 
 // Pour tester le robot, ne pas oublier de commenter pour les matchs !!!
@@ -110,12 +110,16 @@ bool NavigationStrategy::isOnMazeBorder(int x, int y)
 
 bool NavigationStrategy::isOutside(int x, int y)
 {
-    if (x < (originalMazeLength - (*mazeLength)) / 2 || x >= (*mazeLength) || y < (originalMazeHeight - (*mazeHeight)) / 2 || y >= (*mazeHeight))
-    {
-        return true;
-    }
-
-    return false;
+    return checkIfIsOutside(x, y, originalMazeHeight,
+                            originalMazeLength,
+                            mazeHeight,
+                            mazeLength);
+    // if (x < (originalMazeLength - (*mazeLength)) / 2 || x >= (*mazeLength) || y < (originalMazeHeight - (*mazeHeight)) / 2 || y >= (*mazeHeight))
+    //{
+    //     return true;
+    // }
+    //
+    // return false;
 }
 
 int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)

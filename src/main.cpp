@@ -77,7 +77,11 @@ void setup()
     navigation = new Navigation(gladiator);
     navigationStack = new NavigationStack(MAXIMAL_POSITION_ARRAY_LENGTH);
     navigationStrategy = new NavigationStrategy(navigationStack, gladiator, DEPTH_WALKING, maze, &ACTUAL_MAZE_HEIGHT, &ACTUAL_MAZE_LENGTH, MAZE_HEIGHT, MAZE_LENGTH);
-    stateStrategy = new StateStrategy(STATE::BASIC, navigation, navigationStack, gladiator, navigationStrategy);
+    stateStrategy = new StateStrategy(STATE::BASIC, navigation, navigationStack, gladiator, navigationStrategy,
+                                      MAZE_HEIGHT,
+                                      MAZE_LENGTH,
+                                      &ACTUAL_MAZE_HEIGHT,
+                                      &ACTUAL_MAZE_LENGTH);
 
 #ifdef FREE_MODE
     gladiator->game->enableFreeMode(RemoteMode::OFF);
@@ -88,19 +92,20 @@ void loop()
 {
 
 #ifdef FREE_MODE
-        static unsigned i = 0;
-        static int currentTargetIndex = 0;
-        bool showLogs = (i % 50 == 0);
-        if (navigation->driveTo(targets[currentTargetIndex], showLogs) == NAVIGATION_TARGET_STATE::REACHED)
-        {
-            gladiator->log("Target %d reached", currentTargetIndex);
-            currentTargetIndex = (currentTargetIndex + 1) % (sizeof(targets) / sizeof(Vector2));
-        }
-        i++;
+    static unsigned i = 0;
+    static int currentTargetIndex = 0;
+    bool showLogs = (i % 50 == 0);
+    if (navigation->driveTo(targets[currentTargetIndex], showLogs) == NAVIGATION_TARGET_STATE::REACHED)
+    {
+        gladiator->log("Target %d reached", currentTargetIndex);
+        currentTargetIndex = (currentTargetIndex + 1) % (sizeof(targets) / sizeof(Vector2));
+    }
+    i++;
 #else
-    static Timer timer = Timer();
     if (gladiator->game->isStarted())
     {
+        static Timer timer = Timer();
+        bool mazeWillShrink = false;
 
         if (timer.hasElapsed())
         {
@@ -116,11 +121,14 @@ void loop()
             /// On recréer notre liste comme il faut
             stateStrategy->resetBasicStrategy();
         }
-        else
+        else if (timer.mightSaveHisAss())
         {
-            stateStrategy->next();
+            mazeWillShrink = true;
         }
+
+        stateStrategy->next(mazeWillShrink);
+
 #endif
-        delay(10); // boucle à 100Hz
-    }
+    delay(10); // boucle à 100Hz
+}
 }
