@@ -25,7 +25,6 @@ bool NavigationStack::hasNext()
 MyPosition NavigationStack::shift()
 {
     MyPosition p = *positions[0];
-
     for (int i = 0; i < currentIndex; i++)
     {
         positions[i] = positions[i + 1];
@@ -38,7 +37,7 @@ MyPosition NavigationStack::shift()
 void NavigationStack::push(MyPosition pos)
 {
     currentIndex++;
-    std::cout << "Ajoute une case :" << pos.getX() << ":" << pos.getY() << "\n";
+    std::cout << "Ajoute une case -" << currentIndex << " POS :" << pos.getX() << ":" << pos.getY() << "\n";
     positions[currentIndex]->copy(pos);
 }
 
@@ -80,12 +79,4 @@ MyPosition *NavigationStack::getPositionOnTop()
     // std::cout << "CURRENT INDEX :" << currentIndex << "\n";
     // std::cout << "TOP POSITION :" << positions[currentIndex]->getX() << ":" << positions[currentIndex]->getY() << "\n";
     return positions[currentIndex];
-}
-
-void NavigationStack::printTab()
-{
-    for (int i = 0; i < currentIndex; i++)
-    {
-        std::cout << "POSITION - " << i << " (x:" << positions[i]->getX() << " y:" << positions[i]->getY() << ")\n";
-    }
 }

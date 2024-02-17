@@ -58,10 +58,6 @@ public:
      */
     MyPosition *getPositionOnTop();
 
-    /**
-     * @brief Permet de voir l'ensemble de la liste
-     */
-    void printTab();
 
     /**
      * @brief Permet de reduire la liste pour aller plus vite sur les lignes droites 
