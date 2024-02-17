@@ -131,15 +131,15 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
 
     const int caseOustide = -500;
 
+    if (ms == nullptr)
+    {
+        return caseOustide;
+    }
+
     /// Si la case est à nous --
     if (ms->possession == gladiator->robot->getData().teamId)
     {
         return caseEquipe;
-    }
-
-    if (ms == nullptr)
-    {
-        return caseOustide;
     }
 
     /// Si la case a une roquette ++
