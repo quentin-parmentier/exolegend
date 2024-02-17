@@ -6,4 +6,12 @@
 
 float moduloPi(float a);
 
+enum Direction
+{
+    LEFT = 0,
+    RIGHT,
+    TOP,
+    BOTTOM,
+};
+
 #endif

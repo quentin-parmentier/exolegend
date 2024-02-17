@@ -168,14 +168,6 @@ int costOfMS(MazeSquare ms)
     /// On peut se dire qu'aller dans le même sens que ce qu'on a déjà coute moins cher que de tourner et encore moins cher qu'un demi tour
 }
 
-enum Direction
-{
-    LEFT,
-    RIGHT,
-    TOP,
-    BOTTOM,
-};
-
 Direction getRandomDirection()
 {
     int8_t rand_index = random() % 4;
@@ -353,6 +345,8 @@ void getNextCase2()
     gamestate->currentRobotState = STRATEGY_STATE::GETPOINT;
 }
 
+int preferedDirection = Direction::TOP;
+
 void loop()
 {
     static Timer timer = Timer();
@@ -371,13 +365,14 @@ void loop()
     if (gladiator->game->isStarted())
     {
         if(timer.hasElapsed()){
+            timer.reset();
             msList->reset();
         }
 
         if (!msList->hasNext())
         {
             const MazeSquare *currentCase = gladiator->maze->getNearestSquare();
-            MazeSquare *ms;
+            MazeSquare *ms = nullptr;
             if (currentCase->northSquare != nullptr)
             {
                 ms = currentCase->northSquare->southSquare;
@@ -390,11 +385,17 @@ void loop()
             {
                 ms = currentCase->eastSquare->westSquare;
             }
-            else
+            else if (currentCase->westSquare != nullptr)
             {
                 ms = currentCase->westSquare->eastSquare;
             }
-            strategy->generatePath(20, nullptr, ms, msList);
+
+            if (ms != nullptr) {
+                std::cout << "Case courante : x " << ((int)ms->i) << " y " << ((int)ms->j) << "\n";
+                strategy->generatePath(20, nullptr, ms, msList, (Direction) preferedDirection);
+                preferedDirection = (preferedDirection + 1) % 4;
+                msList->printDebug();
+            }
         }
 
         if (caseCible == nullptr && msList->hasNext())

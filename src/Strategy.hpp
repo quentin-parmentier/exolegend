@@ -3,12 +3,13 @@
 
 #include <gladiator.h>
 #include "MazeSquareList.hpp"
+#include "utils.hpp"
 
 class Strategy
 {
 public:
     Strategy(Gladiator *gladiator);
-    void generatePath(int pointToWin, MazeSquare *departureMS, MazeSquare *currentMS, MazeSquareList *path);
+    void generatePath(int pointToWin, MazeSquare *departureMS, MazeSquare *currentMS, MazeSquareList *path, Direction preferedDirection);
     
 private:
     Gladiator *gladiator;
