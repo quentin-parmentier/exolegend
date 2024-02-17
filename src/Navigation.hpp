@@ -32,6 +32,18 @@ class Navigation {
         Vector2 startPosition;
 
         /**
+         * @brief Compteur de rotation pour détecter qu'on arrive pas à atteindre notre point d'arrivée
+         * 
+         */
+        float rotationCounter;
+
+        /**
+         * @brief Dernière position connue
+         * 
+         */
+        Vector2 previousPosition;
+
+        /**
          * @brief Dernière cible vers laquelle on se dirige
          * 
          */

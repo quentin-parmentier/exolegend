@@ -13,9 +13,7 @@ inline float Navigation::rotationOffsetFromAngleError(float angleOffset)
     // Seuil en dessous duquel on considère qu'on a pas besoin de corriger l'angle
     constexpr float ANGLE_REACHED_THRESHOLD = 2. * (M_PI / 180.f); // 2° de tolérance
     // Valeur d'angle en dessous de la quelle on applique une correction proportionnelle à la cible
-    constexpr float ANGLE_APPROACH_VALUE = 0.2;
     constexpr float MAX_ROTATION_SPEED = 0.20;
-    constexpr float MIN_ROTATION_SPEED = 0.05;
     float absAngleOffset = std::abs(angleOffset);
     // Si on a pas besoin de corriger l'angle
     if (absAngleOffset < ANGLE_REACHED_THRESHOLD)
@@ -84,6 +82,8 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
         previousTargetPosition = Vector2(target.x(), target.y());
         lastState = NAVIGATION_TARGET_STATE::NOT_SET;
         startPosition = Vector2(pos.x(), pos.y());
+        rotationCounter = 0.;
+        previousPosition = Vector2(pos.x(), pos.y());
         if (showLogs)
         {
             gladiator->log("New target x %f, y %f ; current pos x %f, y %f", previousTargetPosition.x(), previousTargetPosition.y(), startPosition.x(), startPosition.y());
@@ -92,6 +92,8 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
     else if (lastState == NAVIGATION_TARGET_STATE::REACHED)
     {
         return lastState;
+    } else {
+        rotationCounter += previousPosition.angle() - pos.angle();
     }
 
     Vector2 posError = target - pos;
@@ -115,6 +117,7 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
 
     // Analyse de la progression du robot par rapport à la cible
     if (distanceFromTarget < 0.03)
+    if (distanceFromTarget < 0.03 || (abs(rotationCounter) > (2.*M_PI)))
     {
         lastState = NAVIGATION_TARGET_STATE::REACHED;
         leftCommand = 0.;
