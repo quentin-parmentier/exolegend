@@ -10,7 +10,7 @@ class MyPosition
 public:
     MyPosition();
     MyPosition(int x, int y);
-    Vector2 toVector() const;
+    Vector2 toVector(double cellSize) const;
     int getX() const;
     int getY() const;
     void copy(MyPosition p);

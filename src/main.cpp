@@ -23,7 +23,7 @@ const int DEPTH_WALKING = 5;
 Gladiator *gladiator;
 Navigation *navigation;
 
-MyPosition ROBOT_POSITION = MyPosition(0, 0); /// On peut peut être récupérer ça avec le Gladiator @todo
+MyPosition ROBOT_POSITION = MyPosition(0, 0);
 
 /// Position que l'on veut que notre robot parcours (On veut recalculer la nouvelle chaine quand il nous reste 2 positions dans la tab)
 const int MAXIMAL_POSITION_ARRAY_LENGTH = DEPTH_WALKING + 2;
@@ -45,36 +45,36 @@ const Vector2 targets[] = {
     Vector2(0., 0.),
 };
 
+MyPosition actualPositionToFind = MyPosition();
+
 void reset()
 {
+    navigationStack->reset();
     // On récupère tous les points
     for (int x = 0; x < MAZE_LENGTH; x++)
     {
         for (int y = 0; y < MAZE_HEIGHT; y++)
         {
-            gladiator->log("%d;%d", x, y);
             const MazeSquare *msq = gladiator->maze->getSquare(x, y);
             maze[x][y] = msq;
         }
     }
 
-    gladiator->log("STRAT TEST");
+    const MazeSquare *initialMazeSquare = gladiator->maze->getNearestSquare();
+    ROBOT_POSITION = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
+
+    gladiator->log("ROBOT BASE %d:%d", ROBOT_POSITION.getX(), ROBOT_POSITION.getY());
 
     navigationStrategy->computeRandomPathing(ROBOT_POSITION); // @todo Premiere itération ROBOT_POSITION puis derniere case dans robotPositionArray
-
-    gladiator->log("navigation computed. Space left : %d, dumping...", navigationStack->spaceLeft());
-    while (navigationStack->hasNext()) {
-        MyPosition p = navigationStack->shift();
-        gladiator->log("next : %d;%d", p.getX(), p.getY());
-    }
-    gladiator->log("end dump");
+    actualPositionToFind = navigationStack->shift();
 }
 
 void setup()
-{ 
-    maze = (const MazeSquare***) malloc(sizeof(MazeSquare**)*MAZE_LENGTH);
-    for (int i=0; i<MAZE_LENGTH; i++) {
-        maze[i] = (const MazeSquare**) malloc(sizeof(MazeSquare*)*MAZE_HEIGHT);
+{
+    maze = (const MazeSquare ***)malloc(sizeof(MazeSquare **) * MAZE_LENGTH);
+    for (int i = 0; i < MAZE_LENGTH; i++)
+    {
+        maze[i] = (const MazeSquare **)malloc(sizeof(MazeSquare *) * MAZE_HEIGHT);
     }
 
     // instanciation de l'objet gladiator
@@ -83,12 +83,8 @@ void setup()
     gladiator->game->onReset(&reset);
     // gladiator->game->enableFreeMode(RemoteMode::OFF);
     navigation = new Navigation(gladiator);
-    gladiator->log("prout");
     navigationStack = new NavigationStack(MAXIMAL_POSITION_ARRAY_LENGTH);
     navigationStrategy = new NavigationStrategy(navigationStack, gladiator, DEPTH_WALKING, maze, &ACTUAL_MAZE_HEIGHT, &ACTUAL_MAZE_LENGTH, MAZE_HEIGHT, MAZE_LENGTH);
-gladiator->log("prout2");
-reset();
-gladiator->log("prout3");
 
 #ifdef FREE_MODE
     gladiator->game->enableFreeMode(RemoteMode::OFF);
@@ -97,26 +93,9 @@ gladiator->log("prout3");
 
 void loop()
 {
-    if (gladiator->game->isStarted())
-    {
-        /// On set la vrai direction du robot
-        /// actualDirection = Direction::?? @todo
-        /// ROBOT_POSITION aussi : @todo
-
-        static Timer timer = Timer();
-
-        if (timer.hasElapsed())
-        {
-            ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;
-            ACTUAL_MAZE_LENGTH = ACTUAL_MAZE_LENGTH - 2;
-            timer.reset();
-            // gladiator->log("ça fait 20 secondes");
-        }
-        else
-        {
-            // gladiator->log("Pas encore 20 secondes");
-        }
-    }
+    static unsigned i = 0;
+    bool showLogs = (i % 50 == 0);
+    i++;
 
 #ifdef FREE_MODE
     static unsigned i = 0;
@@ -129,9 +108,39 @@ void loop()
     }
     i++;
 #else
-    if (gladiator->game->isStarted())
+    static Timer timer = Timer();
+
+    if (timer.hasElapsed())
     {
-        // TODO : gagner
+        ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;
+        ACTUAL_MAZE_LENGTH = ACTUAL_MAZE_LENGTH - 2;
+        timer.reset();
+        navigationStack->reset();
+
+        const MazeSquare *initialMazeSquare = gladiator->maze->getNearestSquare();
+        const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
+        navigationStrategy->computeRandomPathing(actualRobotPosition);
+
+        /// On se sauve le cul si jamais on est pas dedans 1s avant
+    }
+    else
+    {
+        /// On récupère la prochaine case
+        NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(actualPositionToFind.toVector(gladiator->maze->getSquareSize()));
+        if (showLogs)
+        {
+            gladiator->log("Position visée %d:%d", actualPositionToFind.getX(), actualPositionToFind.getY());
+        }
+        /// On attend de voir si on est arrivé pour redonner la prochaine case
+        if (navigationState == NAVIGATION_TARGET_STATE::REACHED)
+        {
+            gladiator->log("Target %d:%d reached", actualPositionToFind.getX(), actualPositionToFind.getY());
+
+            /// Si on a une pile qui commence à se vide on refaire une nouvelle stack
+            actualPositionToFind = navigationStack->shift();
+            MyPosition *positionOnTop = navigationStack->getPositionOnTop();
+            navigationStrategy->computeRandomPathing(*positionOnTop);
+        }
     }
 #endif
     delay(10); // boucle à 100Hz

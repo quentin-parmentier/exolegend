@@ -10,14 +10,18 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
     // Si on a encore assez de chemin faire on calcule pas de nouveau chemin
     if (navigationStack->spaceLeft() < depthWalking)
     {
+        gladiator->log("On a pas encore de place");
         return;
     }
 
-    const int numberOfTry = 10;
+    gladiator->log("On relance une recherche");
+
+    const int numberOfTry = 50;
     int maxScore = 0;
-    // todo qparmentier
-    Direction lastDirection = Direction::LEFT;
-    ; /// On devrait peut être regarder fromPosition +
+    /// On va ignorer la premiere direction parce que c'est compliqué de savoir dans x pas à combien on sera @todo
+    Direction lastDirection = Direction::RIGHT;
+
+    /// On devrait peut être regarder fromPosition +
 
     /// La suite de position gagnante
     MyPosition positions[depthWalking];
@@ -33,40 +37,32 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
         for (int j = 0; j < depthWalking; j++)
         {
             /// On récupère une position random pour calculer sa valeur
-            const Direction nextDirection = getRandomDirection(lastDirection);
+            const Direction nextDirection = getRandomDirection(lastDirection, j != 0);
 
             /// On ne peut pas forcément annuler le fait d'aller dans un mur parce que parfois ça sera la meilleure chose à faire
             /// Regarder si on est bloqué pour traverser un mur parce que la meilleure solution peut être de ne rien faire !
             const MyPosition nextPosition = getNextCase(nextDirection, actualPosition);
             const int x = nextPosition.getX();
             const int y = nextPosition.getY();
-            gladiator->log("Next x : %d, Next y : %d", x, y);
 
             /// On ne veut pas aller en dehors de la Map => On passe
             if (isOutside(x, y))
             {
-                gladiator->log("On est dehors");
                 /// On fait en sorte de tjr avoir la bonne taille de MyPosition
-                positionOfTry[j] = actualPosition;
+                j--;
                 continue;
             }
 
             const int actualX = actualPosition.getX();
             const int actualY = actualPosition.getY();
-            gladiator->log("Actual x : %d, Actual y : %d", actualX, actualY);
 
             /// On récupère la valeur du prochain MazeSquare
             const MazeSquare *nextMazeSquare = maze[x][y];
             const MazeSquare *actualMazeSquare = maze[actualX][actualY];
 
             const bool isGoingThroughWall = goingThroughWall(nextDirection, actualMazeSquare);
-            gladiator->log("Though wall : %d", isGoingThroughWall);
-
             const int valueOfNextMazeSquare = valueOfMS(nextMazeSquare, isGoingThroughWall);
-            gladiator->log("VALEUR: %d", valueOfNextMazeSquare);
 
-            gladiator->log("NEXT %d", nextDirection);
-            gladiator->log("NEXT %d:%d", nextPosition.getX(), nextPosition.getY());
             /// On update
             actualPosition = nextPosition;
             lastDirection = nextDirection;
@@ -84,10 +80,8 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
         }
     }
 
-    gladiator->log("On met a jour notre tableau passe en params");
     for (int i = 0; i < depthWalking; i++)
     {
-        gladiator->log("La pos %d c'est %d:%d", i, positions[i].getX(), positions[i].getY());
         navigationStack->push(positions[i]);
     }
 }
@@ -132,11 +126,10 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
     const int caseDanger = -20;
     const int caseBorder = 70; /// Regarder qu'on ne l'a pas déjà ? @todo
     const int caseOustide = -500;
-    const int caseGoingThrougWall = -40;
+    const int caseGoingThrougWall = -80;
 
     if (ms == nullptr)
     {
-        gladiator->log("MS EST NULL !! On est en dehors ?");
         return caseOustide;
     }
 
@@ -179,8 +172,6 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
         score += caseGoingThrougWall;
     }
 
-    gladiator->log("SCORE : %d", score);
-
     return score;
     /// Si la case est près d'un ennemie et qu'on a pas de roquette --
     /// Si la case est près d'un ennemie (en ligne droite) et qu'on a une roquette ++
@@ -216,19 +207,17 @@ Direction NavigationStrategy::getReverseDirection(Direction direction)
     return Direction::TOP;
 }
 
-Direction NavigationStrategy::getRandomDirection(Direction lastDirection)
+Direction NavigationStrategy::getRandomDirection(Direction lastDirection, bool tryToGoForward)
 {
     int8_t rand_index = random() % 4;
-
-    gladiator->log("RANDOM: %d", rand_index);
 
     // Sélection aléatoire d'une valeur de l'énuméré
     Direction nextDirection = static_cast<Direction>(rand_index);
 
-    // Si on retourne directe sur la case d'avant, on essaye d'avancer plutot
-    if (getReverseDirection(nextDirection) == lastDirection)
+    // Si on retourne directe sur la case d'avant, on essaye d'avancer plutot avec une probabilité de 30%
+    if (tryToGoForward && getReverseDirection(nextDirection) == lastDirection && (random() % 10) <= 5)
     {
-        nextDirection = lastDirection;
+        nextDirection = lastDirection; //@todo a remettre
     }
 
     return nextDirection;
@@ -262,8 +251,6 @@ MyPosition NavigationStrategy::getNextCase(Direction direction, MyPosition posit
         nextY = actualY - 1;
     }
 
-    gladiator->log("FUTUR CASE %d:%d", nextX, nextY);
-
     return MyPosition(nextX, nextY);
 }
 
@@ -273,10 +260,8 @@ bool NavigationStrategy::goingThroughWall(Direction direction, const MazeSquare 
 
     if (direction == Direction::TOP)
     {
-        gladiator->log("TOP");
         if (mazeSquare != nullptr && mazeSquare->northSquare == nullptr)
         {
-            gladiator->log("TOP A TRAVERS LE MUR");
             return true;
         }
 
@@ -285,10 +270,8 @@ bool NavigationStrategy::goingThroughWall(Direction direction, const MazeSquare 
 
     if (direction == Direction::LEFT)
     {
-        gladiator->log("LEFT");
         if (mazeSquare != nullptr && mazeSquare->westSquare == nullptr)
         {
-            gladiator->log("LEFT A TRAVERS LE MUR");
             return true;
         }
 
@@ -297,10 +280,8 @@ bool NavigationStrategy::goingThroughWall(Direction direction, const MazeSquare 
 
     if (direction == Direction::BOTTOM)
     {
-        gladiator->log("BOTTOM");
         if (mazeSquare != nullptr && mazeSquare->southSquare == nullptr)
         {
-            gladiator->log("BOTTOM A TRAVERS LE MUR");
             return true;
         }
 
@@ -309,16 +290,13 @@ bool NavigationStrategy::goingThroughWall(Direction direction, const MazeSquare 
 
     if (direction == Direction::RIGHT)
     {
-        gladiator->log("RIGHT");
         if (mazeSquare != nullptr && mazeSquare->eastSquare == nullptr)
         {
-            gladiator->log("RIGHT A TRAVERS LE MUR");
             return true;
         }
 
         return false;
     }
 
-    gladiator->log("Traverse pas de mur");
     return isGoingThroughWall;
 }
