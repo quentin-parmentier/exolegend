@@ -121,6 +121,7 @@ void loop()
             /// On se sauve le cul si jamais on est pas dedans 1s avant
 
             /// On recréer notre liste comme il faut
+            gladiator->log("C'est elapse");
             stateStrategy->resetBasicStrategy();
         }
         else if (timer.mightSaveHisAss())
