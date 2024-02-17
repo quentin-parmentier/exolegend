@@ -59,5 +59,7 @@ void StateStrategy::useSaveStrategy(){
 };
 
 void StateStrategy::useRocketStrategy(){
-
+    if(gladiator->weapon->canLaunchRocket){
+        gladiator->weapon->launchRocket();
+    }
 };
