@@ -16,13 +16,14 @@ class StateStrategy
 {
 
 public:
-    StateStrategy(STATE baseState, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy);
+    StateStrategy(STATE baseState, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength);
     void useBasicStrategy();
     void useSaveStrategy();
     void useRocketStrategy();
-    void next();
+    void next(bool mazeWillShrink);
     void resetBasicStrategy();
     MyPosition actualPositionToFind;
+    bool shouldSaveMyAss();
 
 private:
     STATE state;
@@ -30,6 +31,10 @@ private:
     NavigationStack *navigationStack;
     Gladiator *gladiator;
     NavigationStrategy *navigationStrategy;
+    int originalMazeHeight;
+    int originalMazeLength;
+    int *mazeHeight;
+    int *mazeLength;
 };
 
 #endif
