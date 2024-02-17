@@ -1,28 +1,23 @@
 #include "NavigationStrategy.hpp"
 
-NavigationStrategy::NavigationStrategy(NavigationStack *navigationStack, Gladiator *gladiator, int depthWalking, const MazeSquare*** maze, int *mazeHeight, int *mazeLength, int originalMazeHeight, int originalMazeLength)
-    : navigationStack(navigationStack)
-    , gladiator(gladiator)
-    , depthWalking(depthWalking)
-    , maze(maze)
-    , mazeHeight(mazeHeight)
-    , mazeLength(mazeLength)
-    , originalMazeHeight(originalMazeHeight)
-    , originalMazeLength(originalMazeLength)
+NavigationStrategy::NavigationStrategy(NavigationStack *navigationStack, Gladiator *gladiator, int depthWalking, const MazeSquare ***maze, int *mazeHeight, int *mazeLength, int originalMazeHeight, int originalMazeLength)
+    : navigationStack(navigationStack), gladiator(gladiator), depthWalking(depthWalking), maze(maze), mazeHeight(mazeHeight), mazeLength(mazeLength), originalMazeHeight(originalMazeHeight), originalMazeLength(originalMazeLength)
 {
 }
 
 void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
 {
     // Si on a encore assez de chemin faire on calcule pas de nouveau chemin
-    if (navigationStack->spaceLeft() < depthWalking) {
+    if (navigationStack->spaceLeft() < depthWalking)
+    {
         return;
     }
 
     const int numberOfTry = 10;
     int maxScore = 0;
     // todo qparmentier
-    Direction lastDirection = Direction::LEFT;; /// On devrait peut être regarder fromPosition +
+    Direction lastDirection = Direction::LEFT;
+    ; /// On devrait peut être regarder fromPosition +
 
     /// La suite de position gagnante
     MyPosition positions[depthWalking];
@@ -97,19 +92,18 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
     }
 }
 
-
 // Pour tester le robot, ne pas oublier de commenter pour les matchs !!!
 // #define FREE_MODE
 
 bool NavigationStrategy::isOnMazeBorder(int x, int y)
 {
     /// Sur la borne côté
-    if ((x == (originalMazeLength - (*mazeLength)) || x == ((*mazeLength)) - 1) && y >= (originalMazeHeight - (*mazeHeight)) && y < (*mazeHeight))
+    if ((x == (originalMazeLength - (*mazeLength)) / 2 || x == ((*mazeLength)) - 1) && y >= (originalMazeHeight - (*mazeHeight)) / 2 && y < (*mazeHeight))
     {
         return true;
     }
     /// Sur la borne haut/bas
-    else if ((y == (originalMazeHeight - (*mazeHeight)) || y == ((*mazeHeight) - 1)) && x >= (originalMazeLength - (*mazeLength)) && x < (*mazeLength))
+    else if ((y == (originalMazeHeight - (*mazeHeight)) / 2 || y == ((*mazeHeight) - 1)) && x >= (originalMazeLength - (*mazeLength)) / 2 && x < (*mazeLength))
     {
         return true;
     }
@@ -119,7 +113,7 @@ bool NavigationStrategy::isOnMazeBorder(int x, int y)
 
 bool NavigationStrategy::isOutside(int x, int y)
 {
-    if (x < (originalMazeLength - (*mazeLength)) || x >= (*mazeLength) || y < (originalMazeHeight - (*mazeHeight)) || y >= (*mazeHeight))
+    if (x < (originalMazeLength - (*mazeLength)) / 2 || x >= (*mazeLength) || y < (originalMazeHeight - (*mazeHeight)) / 2 || y >= (*mazeHeight))
     {
         return true;
     }
