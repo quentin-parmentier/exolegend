@@ -92,7 +92,9 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
     else if (lastState == NAVIGATION_TARGET_STATE::REACHED)
     {
         return lastState;
-    } else {
+    }
+    else
+    {
         rotationCounter += previousPosition.angle() - pos.angle();
     }
 
@@ -116,8 +118,7 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
     float rightCommand = speedValue - rotationOffset;
 
     // Analyse de la progression du robot par rapport à la cible
-    if (distanceFromTarget < 0.03)
-    if (distanceFromTarget < 0.03 || (abs(rotationCounter) > (2.*M_PI)))
+    if (distanceFromTarget < 0.03 || (abs(rotationCounter) > (2. * M_PI)))
     {
         lastState = NAVIGATION_TARGET_STATE::REACHED;
         leftCommand = 0.;

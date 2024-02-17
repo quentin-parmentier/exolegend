@@ -58,10 +58,6 @@ public:
      */
     MyPosition *getPositionOnTop();
 
-    /**
-     * @brief Permet de voir l'ensemble de la liste
-     */
-    void printTab();
 
 private:
     MyPosition **positions;
