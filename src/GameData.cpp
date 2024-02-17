@@ -25,6 +25,7 @@ void GameState::reduceMaze(){
     actual_maze_length = actual_maze_length - 2;
 }
 
+
 void GameState::reset(){
     //currentRobotData = NULL;
     isFirstTurn = true;

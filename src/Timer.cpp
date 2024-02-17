@@ -13,7 +13,7 @@ bool Timer::mazeWillShrink()
 {
     auto currentTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - lastTime).count();
-    return elapsedTime >= (TIME_FOR_NEW_WALL -2000);
+    return elapsedTime >= TIME_SHRINK_ALERT;
 }
 
 void Timer::reset()

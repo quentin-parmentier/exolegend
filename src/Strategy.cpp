@@ -1,5 +1,6 @@
 #include"Strategy.hpp"
 
+
 Strategy::Strategy(Gladiator *gladiator) : gladiator(gladiator) {
 }
 
@@ -31,5 +32,21 @@ void Strategy::generatePath(int pointToWin, MazeSquare *departureMS, MazeSquare 
         path->push(currentMS->westSquare);
         generatePath(currentMS->westSquare->possession != 0? pointToWin:pointToWin-1, currentMS, currentMS->westSquare, path );
         path->push(currentMS);
+    }
+}
+
+void Strategy::backOnMaze(MazeSquare *currentMS, GameState *gamestate, MazeSquareList *path )
+{
+    if (currentMS->i < (MAZE_LENGTH - gamestate->actual_maze_length - 1) / 2)
+    {
+        path->push(currentMS->eastSquare);
+    }else if (currentMS->i >= gamestate->actual_maze_length-1)
+    {
+        path->push(currentMS->westSquare);
+    }else if (currentMS->j < (MAZE_HEIGHT - gamestate->actual_maze_height - 1) / 2)
+    {
+        path->push(currentMS->northSquare);
+    }else if(currentMS->j >= gamestate->actual_maze_height-1){
+        path->push(currentMS->southSquare);
     }
 }

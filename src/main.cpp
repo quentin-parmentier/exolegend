@@ -104,14 +104,6 @@ bool isFutureOutside(int i, int j)
     }
 }
 
-void backOnMaze(int i, int j)
-{
-    if (i < (MAZE_LENGTH - gamestate->actual_maze_length - 1) / 2)
-    {
-        // Direction::TOP
-    }
-}
-
 int valueOfMS(const MazeSquare *ms, const bool throughWall)
 {
     // return 1;
@@ -370,31 +362,30 @@ void loop()
 #else
     if (gladiator->game->isStarted())
     {
+        const MazeSquare *currentCase = gladiator->maze->getNearestSquare();
         if(timer.hasElapsed()){
+            gladiator->log("shrinked");
+            // gamestate->GetMazeData(gladiator.)
+            gamestate->reduceMaze();
+            gamestate->GetMazeData(gladiator);
+            // msList->reset();
+            timer.reset();
+        }
+        if(timer.mazeWillShrink() && timer.shrinkAlarmTriggered == false){
+            gladiator->log("will shrink");
+            
+            
+            strategy->backOnMaze( msTransfo(currentCase) , gamestate, msList);
             msList->reset();
+            timer.shrinkAlarmTriggered = true;
+            // msList->reset();
         }
 
         if (!msList->hasNext())
         {
-            const MazeSquare *currentCase = gladiator->maze->getNearestSquare();
-            MazeSquare *ms;
-            if (currentCase->northSquare != nullptr)
-            {
-                ms = currentCase->northSquare->southSquare;
-            }
-            else if (currentCase->southSquare != nullptr)
-            {
-                ms = currentCase->southSquare->northSquare;
-            }
-            else if (currentCase->eastSquare != nullptr)
-            {
-                ms = currentCase->eastSquare->westSquare;
-            }
-            else
-            {
-                ms = currentCase->westSquare->eastSquare;
-            }
-            strategy->generatePath(20, nullptr, ms, msList);
+            // const MazeSquare *currentCase = gladiator->maze->getNearestSquare();
+            
+            strategy->generatePath(20, nullptr, msTransfo(currentCase), msList);
         }
 
         if (caseCible == nullptr && msList->hasNext())
