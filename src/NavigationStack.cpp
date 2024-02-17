@@ -46,7 +46,8 @@ void NavigationStack::reset()
     currentIndex = -1;
 }
 
-void NavigationStack::simplify(){
+void NavigationStack::simplify()
+{
     // MyPosition *ref = positions[0];
     std::cout << "start SIpmlify \n";
     // MyPosition *positionsTemp[stackSize] ;
@@ -54,24 +55,27 @@ void NavigationStack::simplify(){
     int tableposition = 0;
 
     // iterate over X
-    for (int i = 1; i < stackSize-1; i++)
+    for (int i = 1; i < stackSize - 1; i++)
     {
         // std::cout << "iteration" << i <<"\n";
         // si le point n'a pas le même X que ces voisins
-        if((positions[i-1]->getX() == positions[i]->getX() && positions[i+1]->getX() == positions[i]->getX() && abs(positions[i+1]->getY() - positions[i-1]->getY()) !=0 ) || (positions[i-1]->getY() == positions[i]->getY() && positions[i+1]->getY() == positions[i]->getY() && abs(positions[i+1]->getX() - positions[i-1]->getX()) != 0)){
+        if ((positions[i - 1]->getX() == positions[i]->getX() && positions[i + 1]->getX() == positions[i]->getX() && abs(positions[i + 1]->getY() - positions[i - 1]->getY()) != 0) || (positions[i - 1]->getY() == positions[i]->getY() && positions[i + 1]->getY() == positions[i]->getY() && abs(positions[i + 1]->getX() - positions[i - 1]->getX()) != 0))
+        {
             // tableposition++;
             // positionsTemp[tableposition] = positions[i];
-        }else {
+        }
+        else
+        {
             tableposition++;
             positionsTemp[tableposition] = positions[i];
         }
     }
     currentIndex = tableposition;
-    for(int i =0; i<= currentIndex; i++){
+    for (int i = 0; i <= currentIndex; i++)
+    {
         positions[i] = positionsTemp[i];
     }
     std::cout << "end SIpmlify \n";
-
 }
 
 MyPosition *NavigationStack::getPositionOnTop()

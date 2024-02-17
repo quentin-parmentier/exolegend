@@ -44,6 +44,8 @@ Direction actualDirection = Direction::LEFT;
 void reset()
 {
     navigationStack->reset();
+    ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
+    ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
     // On récupère tous les points
     for (int x = 0; x < MAZE_LENGTH; x++)
     {
@@ -105,9 +107,9 @@ void loop()
     }
     i++;
 #else
+    static Timer timer = Timer();
     if (gladiator->game->isStarted())
     {
-        static Timer timer = Timer();
         bool mazeWillShrink = false;
     
         if (timer.hasElapsed())
@@ -132,8 +134,11 @@ void loop()
         }
 
         stateStrategy->next(mazeWillShrink);
-
-#endif
+    }
+    else
+    {
+        timer.reset();
+    }
     delay(10); // boucle à 100Hz
-}
+#endif
 }

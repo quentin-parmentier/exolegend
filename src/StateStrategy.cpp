@@ -5,11 +5,13 @@
 
 StateStrategy::StateStrategy(STATE baseState, RobotsData *robotsData, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength) : state(baseState), robotsData(robotsData), navigation(navigation),
                                                                                                                                                                                                                                                           navigationStack(navigationStack),
-                                                                                                                                                                                                                                                          gladiator(gladiator), navigationStrategy(navigationStrategy), mazeHeight(mazeHeight),
-                                                                                                                                                                                                                                                          mazeLength(mazeLength), originalMazeHeight(originalMazeHeight),
-                                                                                                                                                                                                                                                          originalMazeLength(originalMazeLength)
+                                                                                                                                                                                                                                                          gladiator(gladiator), navigationStrategy(navigationStrategy), originalMazeHeight(originalMazeHeight),
+                                                                                                                                                                                                                                                          originalMazeLength(originalMazeLength), mazeHeight(mazeHeight),
+                                                                                                                                                                                                                                                          mazeLength(mazeLength)
 {
     actualPositionToFind = MyPosition();
+    savePostition = MyPosition();
+    hasToGoToSavePosition = false;
 };
 
 void StateStrategy::resetBasicStrategy()
@@ -28,7 +30,7 @@ void StateStrategy::resetBasicStrategy()
 void StateStrategy::next(bool mazeWillShrink)
 {
     /// On fait les différents checks
-    if (mazeWillShrink && shouldSaveMyAss())
+    if (mazeWillShrink && state != STATE::SAVE && shouldSaveMyAss())
     {
         state = STATE::SAVE;
     }else if(robotsData->isEnemyClose(0.4)){
@@ -46,6 +48,7 @@ void StateStrategy::next(bool mazeWillShrink)
     }
     else if (state == STATE::SAVE)
     {
+        useSaveStrategy();
     }
     else if (state == STATE::ROCKET)
     {
@@ -70,10 +73,32 @@ void StateStrategy::useBasicStrategy()
     }
 };
 
-void StateStrategy::useSaveStrategy(){
-    /// On trouve la case la plus proche
+void StateStrategy::useSaveStrategy()
+{
+    /// On vient d'arriver dans l'état SAVE
+    if (!hasToGoToSavePosition)
+    {
+        hasToGoToSavePosition = true;
+        /// On trouve la case la plus proche
+        const MazeSquare *msq = gladiator->maze->getNearestSquare();
+
+        int nextMazeHeight = (*mazeHeight - 2);
+        int nextMazeLength = (*mazeLength - 2);
+        savePostition = getNearestValidPosition(msq->i, msq->j, originalMazeHeight, originalMazeLength, nextMazeHeight, nextMazeLength);
+
+        gladiator->log("On est en : %d:%d", msq->i, msq->j);
+        gladiator->log("La position de repli c'est : %d:%d", savePostition.getX(), savePostition.getY());
+    }
 
     /// On y va à pleine balle tout droit
+    NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(savePostition.toVector(gladiator->maze->getSquareSize()));
+    /// Est-ce qu'on est arrivé à la position ? On reset
+    if (navigationState == NAVIGATION_TARGET_STATE::REACHED)
+    {
+        hasToGoToSavePosition = false;
+        state = STATE::BASIC;
+        resetBasicStrategy();
+    }
 };
 
 void StateStrategy::useRocketStrategy(){
@@ -87,7 +112,8 @@ bool StateStrategy::shouldSaveMyAss()
     const MazeSquare *msq = gladiator->maze->getNearestSquare();
     /// Est-ce qu'on va être en dehors des limites ?
     /// -2 parce qu'on fait comme si y'avait
-    // int mazeHeight = (*mazeHeight - 2);
-    // int mazeLength = (*mazeLength - 2);
-    // return checkIfIsOutside(msq->i, msq->j, originalMazeHeight, originalMazeLength, &mazeHeight, &mazeLength);
+    int nextMazeHeight = (*mazeHeight - 2);
+    int nextMazeLength = (*mazeLength - 2);
+
+    return checkIfIsOutside(msq->i, msq->j, originalMazeHeight, originalMazeLength, &nextMazeHeight, &nextMazeLength);
 }

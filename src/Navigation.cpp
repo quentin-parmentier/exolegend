@@ -142,3 +142,9 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
     }
     return lastState;
 }
+
+void Navigation::spin()
+{
+    gladiator->control->setWheelSpeed(WheelAxis::LEFT, -0.5);
+    gladiator->control->setWheelSpeed(WheelAxis::RIGHT, 0.5);
+}

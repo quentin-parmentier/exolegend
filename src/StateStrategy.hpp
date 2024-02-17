@@ -38,6 +38,8 @@ private:
     int originalMazeLength;
     int *mazeHeight;
     int *mazeLength;
+    MyPosition savePostition;
+    bool hasToGoToSavePosition;
 };
 
 #endif

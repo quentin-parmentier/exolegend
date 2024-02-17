@@ -86,7 +86,7 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
         navigationStack->push(positions[i]);
     }
 
-    navigationStack->simplify();
+    // navigationStack->simplify();
 }
 
 // Pour tester le robot, ne pas oublier de commenter pour les matchs !!!
