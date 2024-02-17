@@ -84,7 +84,7 @@ void StateStrategy::useSaveStrategy()
     }
 
     /// On y va à pleine balle tout droit
-    NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(actualPositionToFind.toVector(gladiator->maze->getSquareSize()));
+    NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(savePostition.toVector(gladiator->maze->getSquareSize()));
     /// Est-ce qu'on est arrivé à la position ? On reset
     if (navigationState == NAVIGATION_TARGET_STATE::REACHED)
     {
