@@ -3,7 +3,7 @@
 
 #include "Vector2.hpp"
 
-#define CELL_SIZE (3.0 / 12)
+#define CELL_SIZE (3.0 / 12) ///@todo récupérer la bonne valeur avec le gladiator
 
 class MyPosition
 {
@@ -16,6 +16,5 @@ public:
 private:
     int _x, _y;
 };
-
 
 #endif
