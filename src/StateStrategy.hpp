@@ -30,7 +30,6 @@ public:
     STATE state;
 
 private:
-    STATE state;
     RobotsData *robotsData;
     Navigation *navigation;
     NavigationStack *navigationStack;
