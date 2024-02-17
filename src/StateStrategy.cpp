@@ -10,7 +10,7 @@ StateStrategy::StateStrategy(STATE baseState, RobotsData *robotsData, Navigation
                                                                                                                                                                                                                                                           mazeLength(mazeLength)
 {
     actualPositionToFind = MyPosition();
-    savePostition = MyPosition();
+    savePosition = MyPosition();
     hasToGoToSavePosition = false;
 };
 
@@ -91,17 +91,21 @@ void StateStrategy::useSaveStrategy()
 
         int nextMazeHeight = (*mazeHeight - 2);
         int nextMazeLength = (*mazeLength - 2);
-        savePostition = getNearestValidPosition(msq->i, msq->j, originalMazeHeight, originalMazeLength, nextMazeHeight, nextMazeLength);
+        savePosition = getNearestValidPosition(msq->i, msq->j, originalMazeHeight, originalMazeLength, nextMazeHeight, nextMazeLength);
 
         gladiator->log("On est en : %d:%d", msq->i, msq->j);
-        gladiator->log("La position de repli c'est : %d:%d", savePostition.getX(), savePostition.getY());
+        gladiator->log("La position de repli c'est : %d:%d", savePosition.getX(), savePosition.getY());
     }
 
     /// On y va à pleine balle tout droit
-    NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(savePostition.toVector(gladiator->maze->getSquareSize()));
+    NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(savePosition.toVector(gladiator->maze->getSquareSize()));
     /// Est-ce qu'on est arrivé à la position ? On reset
     if (navigationState == NAVIGATION_TARGET_STATE::REACHED)
     {
+        const MazeSquare *msq = gladiator->maze->getNearestSquare();
+        gladiator->log("On est safe en : %d:%d", msq->i, msq->j);
+        gladiator->log("La position safe c'est : %d:%d", savePosition.getX(), savePosition.getY());
+
         hasToGoToSavePosition = false;
         state = STATE::BASIC;
         resetBasicStrategy();

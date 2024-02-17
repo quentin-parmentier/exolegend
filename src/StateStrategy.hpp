@@ -27,6 +27,7 @@ public:
     void resetBasicStrategy();
     MyPosition actualPositionToFind;
     bool shouldSaveMyAss();
+    STATE state;
 
 private:
     STATE state;
@@ -39,7 +40,7 @@ private:
     int originalMazeLength;
     int *mazeHeight;
     int *mazeLength;
-    MyPosition savePostition;
+    MyPosition savePosition;
     bool hasToGoToSavePosition;
 };
 

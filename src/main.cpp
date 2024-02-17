@@ -121,13 +121,16 @@ void loop()
             ACTUAL_MAZE_LENGTH = ACTUAL_MAZE_LENGTH - 2;
             timer.reset();
 
-            /// Notre stack n'est plus bonne on la reset
-            navigationStack->reset();
-
-            /// On se sauve le cul si jamais on est pas dedans 1s avant
-
-            /// On recréer notre liste comme il faut
-            stateStrategy->resetBasicStrategy();
+            if (stateStrategy->state != STATE::SAVE)
+            {
+                /// On recréer notre liste comme il faut
+                gladiator->log("C'est elapse");
+                stateStrategy->resetBasicStrategy();
+            }
+            else
+            {
+                gladiator->log("On essaye de se barrer");
+            }
         }
         else if (timer.mightSaveHisAss())
         {
