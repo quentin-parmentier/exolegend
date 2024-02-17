@@ -18,6 +18,11 @@ class Navigation {
         Navigation(Gladiator *gladiator);
         NAVIGATION_TARGET_STATE driveTo(const Vector2 &target, bool showLogs = false);
 
+        /**
+         * @brief Fait tourner rapidement le robot sur lui même
+         */
+        void spin();
+
     private:
         /**
          * @brief référence au robot
