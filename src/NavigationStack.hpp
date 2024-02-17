@@ -63,8 +63,14 @@ public:
      */
     void printTab();
 
+    /**
+     * @brief Permet de reduire la liste pour aller plus vite sur les lignes droites 
+     */
+    void simplify();
+
 private:
     MyPosition **positions;
+    MyPosition **positionsTemp;
     int stackSize;
     int currentIndex;
 };

@@ -4,6 +4,8 @@
 NavigationStack::NavigationStack(int stackSize) : stackSize(stackSize), currentIndex(-1)
 {
     positions = (MyPosition **)malloc(sizeof(MyPosition *) * stackSize);
+    positionsTemp = (MyPosition **)malloc(sizeof(MyPosition *) * stackSize);
+
     for (int i = 0; i < stackSize; i++)
     {
         positions[i] = new MyPosition();
@@ -43,6 +45,34 @@ void NavigationStack::push(MyPosition pos)
 void NavigationStack::reset()
 {
     currentIndex = -1;
+}
+
+void NavigationStack::simplify(){
+    // MyPosition *ref = positions[0];
+    std::cout << "start SIpmlify \n";
+    // MyPosition *positionsTemp[stackSize] ;
+    positionsTemp[0] = positions[0];
+    int tableposition = 0;
+
+    // iterate over X
+    for (int i = 1; i < stackSize-1; i++)
+    {
+        // std::cout << "iteration" << i <<"\n";
+        // si le point n'a pas le même X que ces voisins
+        if((positions[i-1]->getX() == positions[i]->getX() && positions[i+1]->getX() == positions[i]->getX() && abs(positions[i+1]->getY() - positions[i-1]->getY()) !=0 ) || (positions[i-1]->getY() == positions[i]->getY() && positions[i+1]->getY() == positions[i]->getY() && abs(positions[i+1]->getX() - positions[i-1]->getX()) != 0)){
+            // tableposition++;
+            // positionsTemp[tableposition] = positions[i];
+        }else {
+            tableposition++;
+            positionsTemp[tableposition] = positions[i];
+        }
+    }
+    currentIndex = tableposition;
+    for(int i =0; i<= currentIndex; i++){
+        positions[i] = positionsTemp[i];
+    }
+    std::cout << "end SIpmlify \n";
+
 }
 
 MyPosition *NavigationStack::getPositionOnTop()
