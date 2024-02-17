@@ -103,7 +103,7 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
     float rightCommand = speedValue - rotationOffset;
 
     // Analyse de la progression du robot par rapport à la cible
-    if (distanceFromTarget < 0.01) {
+    if (distanceFromTarget < 0.03) {
         lastState = NAVIGATION_TARGET_STATE::REACHED;
         leftCommand = 0.;
         rightCommand = 0.;

@@ -9,6 +9,8 @@
 #include "MyPosition.hpp"
 #include "Timer.hpp"
 #include "GameData.hpp"
+#include "Strategy.hpp"
+#include "MazeSquareList.hpp"
 
 #undef abs
 
@@ -23,11 +25,15 @@ const MyPosition ROBOT_POSITION = MyPosition(0, 0); /// On peut peut être récu
 Gladiator *gladiator;
 Navigation *navigation;
 GameState *gamestate;
+Strategy *strategy;
+MazeSquareList *msList;
+MazeSquare *caseCible;
 
 void reset()
 {
     gamestate->reset();
     navigation->reset();
+    caseCible = nullptr;
 }
 
 // Pour tester le robot, ne pas oublier de commenter pour les matchs !!!
@@ -39,6 +45,9 @@ void setup()
     gladiator = new Gladiator();
     navigation = new Navigation(gladiator);
     gamestate = new GameState(gladiator);
+    strategy = new Strategy(gladiator);
+    msList = new MazeSquareList(100);
+    caseCible = nullptr;
     // enregistrement de la fonction de reset qui s'éxecute à chaque fois avant qu'une partie commence
     gladiator->game->onReset(&reset);
 
@@ -347,28 +356,9 @@ void getNextCase2()
 void loop()
 {
     static Timer timer = Timer();
-    // if (gamestate->isFirstTurn)
-    // {
-    //     if (gladiator->maze == nullptr)
-    //     {
-    //         gladiator->log("MAZE EST NULL");
-    //     }
 
-    //     gladiator->log("STRAT TEST");
-
-    //     gamestate->isFirstTurn = false;
-    //     Direction direction[DEPTH_WALKING] = {};
-
-    //     getRandomPathing(direction);
-
-    //     for (size_t i = 0; i < DEPTH_WALKING; i++)
-    //     {
-    //         std::cout << "Valeur de Direction : " << static_cast<int>(direction[i]) << std::endl;
-    //         gladiator->log("PATH : %d", direction[i]);
-    //     }
-    // }
-    static unsigned i = 0;
-    bool showLogs = (i % 50 == 0);
+    // static unsigned i = 0;
+    // bool showLogs = (i % 50 == 0);
 
 #ifdef FREE_MODE
     static int currentTargetIndex = 0;
@@ -380,73 +370,99 @@ void loop()
 #else
     if (gladiator->game->isStarted())
     {
-        static int currentTargetIndex = 0;
-        ///// Controle de la machine à état
-        if (gamestate->isFirstTurn)
-        {
-            // calcul de la startegy
-            gamestate->currentRobotState = STRATEGY_STATE::IDLE;
-            const MazeSquare *nearestSquare = gladiator->maze->getNearestSquare();
-            targets[0] = MyPosition(nearestSquare->i, nearestSquare->j).toVector();
-            getNextCase2();
-            gamestate->isFirstTurn = false;
-            timer.reset();
-        }
-        else
-        {
-            //// faire un filtre de MAJ de l'etat tou les 50 ms
-
-            // le systeme va shrink
-            if (timer.mazeWillShrink())
-            {
-                // si dans une case qui va disparaitre
-                // if(isFutureOutside()){
-                gladiator->log("will shrink");
-                // }
-            }
-            if (timer.hasElapsed())
-            {
-                gamestate->reduceMaze();
-                timer.reset();
-            }
+        if(timer.hasElapsed()){
+            msList->reset();
         }
 
-        //// Action en fonction d'e l'etat
-        if (gamestate->currentRobotState == STRATEGY_STATE::IDLE)
+        if (!msList->hasNext())
         {
-            /// recalculer la tsrategy
-            getNextCase2();
-            // NAVIGATION_TARGET_STATE::REACHED;
-        }
-        else if (gamestate->currentRobotState == STRATEGY_STATE::GETPOINT)
-        {
-            if (navigation->driveTo(targets[currentTargetIndex], showLogs) == NAVIGATION_TARGET_STATE::REACHED)
+            const MazeSquare *currentCase = gladiator->maze->getNearestSquare();
+            MazeSquare *ms;
+            if (currentCase->northSquare != nullptr)
             {
-                gamestate->currentRobotState = STRATEGY_STATE::IDLE;
-                // gladiator->log("Target %d reached", currentTargetIndex);
-                //  currentTargetIndex = (currentTargetIndex + 1) % (sizeof(targets) / sizeof(Vector2));
+                ms = currentCase->northSquare->southSquare;
+            }
+            else if (currentCase->southSquare != nullptr)
+            {
+                ms = currentCase->southSquare->northSquare;
+            }
+            else if (currentCase->eastSquare != nullptr)
+            {
+                ms = currentCase->eastSquare->westSquare;
+            }
+            else
+            {
+                ms = currentCase->westSquare->eastSquare;
+            }
+            strategy->generatePath(20, nullptr, ms, msList);
+        }
+
+        if (caseCible == nullptr && msList->hasNext())
+        {
+            caseCible = msList->shift();
+        }
+
+        if (caseCible != nullptr)
+        {
+            if (navigation->driveTo(MyPosition(caseCible->i, caseCible->j).toVector(), false) == NAVIGATION_TARGET_STATE::REACHED)
+            {
+                caseCible = nullptr;
             }
         }
-        else if (gamestate->currentRobotState == STRATEGY_STATE::BACKONMAZE)
-        {
-        }
+
+        // ///// Controle de la machine à état
+        // if (gamestate->isFirstTurn)
+        // {
+        //     // calcul de la startegy
+        //     gamestate->currentRobotState = STRATEGY_STATE::IDLE;
+
+        //     // targets[0] = MyPosition(nearestSquare->i, nearestSquare->j).toVector();
+        //     // getNextCase2();
+        //     gamestate->isFirstTurn = false;
+        //     timer.reset();
+        // }
+        // else
+        // {
+        //     //// faire un filtre de MAJ de l'etat tou les 50 ms
+
+        //     // le systeme va shrink
+        //     if (timer.mazeWillShrink())
+        //     {
+        //         // si dans une case qui va disparaitre
+        //         // if(isFutureOutside()){
+        //         gladiator->log("will shrink");
+        //         // }
+        //     }
+        //     if (timer.hasElapsed())
+        //     {
+        //         gamestate->reduceMaze();
+        //         timer.reset();
+        //     }
+        // }
+
+        // //// Action en fonction d'e l'etat
+        // if (gamestate->currentRobotState == STRATEGY_STATE::IDLE)
+        // {
+        //     /// recalculer la tsrategy
+        //     getNextCase2();
+        //     // NAVIGATION_TARGET_STATE::REACHED;
+        // }
+        // else if (gamestate->currentRobotState == STRATEGY_STATE::GETPOINT)
+        // {
+        //     if (navigation->driveTo(targets[currentTargetIndex], showLogs) == NAVIGATION_TARGET_STATE::REACHED)
+        //     {
+        //         gamestate->currentRobotState = STRATEGY_STATE::IDLE;
+        //         // gladiator->log("Target %d reached", currentTargetIndex);
+        //         //  currentTargetIndex = (currentTargetIndex + 1) % (sizeof(targets) / sizeof(Vector2));
+        //     }
+        // }
+        // else if (gamestate->currentRobotState == STRATEGY_STATE::BACKONMAZE)
+        // {
+        // }
 
         /// On set la vrai direction du robot
         /// actualDirection = Direction::?? @todo
         /// ROBOT_POSITION aussi : @todo
-
-        if (timer.hasElapsed())
-        {
-            gamestate->actual_maze_height = gamestate->actual_maze_height - 2;
-            gamestate->actual_maze_length = gamestate->actual_maze_length - 2;
-            timer.reset();
-            // gladiator->robot->getData()
-            // gladiator->log("ça fait 20 secondes");
-        }
-        else
-        {
-            // gladiator->log("Pas encore 20 secondes");
-        }
     }
 #endif
     delay(10); // boucle à 100Hz
