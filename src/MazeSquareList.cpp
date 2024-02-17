@@ -29,6 +29,12 @@ void MazeSquareList::push(MazeSquare* ms) {
     liste[currentIndex] = ms;
 }
 
+void MazeSquareList::simplify() {
+    // TODO
+    // for
+    // liste[currentIndex] = ms;
+}
+
 void MazeSquareList::reset() {
     currentIndex = -1;
 }

@@ -58,6 +58,8 @@ class MazeSquareList {
          */
         void printDebug();
 
+        void simplify();
+
     private:
         MazeSquare** liste;
         int stackSize;

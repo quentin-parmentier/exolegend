@@ -28,7 +28,6 @@ MazeSquare *msTransfo(const MazeSquare *currentCase)
   if (ms != nullptr)
   {
     std::cout << "Case courante : x " << ((int)ms->i) << " y " << ((int)ms->j) << "\n";
-    msList->printDebug();
   }
   return ms;
 }
