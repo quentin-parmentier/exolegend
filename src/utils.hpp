@@ -8,4 +8,12 @@
 float moduloPi(float a);
 MazeSquare* msTransfo(const MazeSquare *currentCase);
 
+enum Direction
+{
+    LEFT = 0,
+    RIGHT,
+    TOP,
+    BOTTOM,
+};
+
 #endif

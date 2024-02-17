@@ -52,6 +52,12 @@ class MazeSquareList {
          */
         void reset();
 
+        /**
+         * @brief affiche du débug
+         * 
+         */
+        void printDebug();
+
     private:
         MazeSquare** liste;
         int stackSize;
