@@ -8,6 +8,7 @@
 class MyPosition
 {
 public:
+    MyPosition();
     MyPosition(int x, int y);
     Vector2 toVector() const;
     int getX() const;

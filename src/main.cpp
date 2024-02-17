@@ -299,24 +299,13 @@ void getRandomPathing(MyPosition *positionTabs, MyPosition fromPosition)
     Direction lastDirection = actualDirection; /// On devrait peut être regarder fromPosition +
 
     /// La suite de position gagnante
-    MyPosition positions[DEPTH_WALKING] = {
-        MyPosition(0, 0),
-        MyPosition(0, 0),
-        MyPosition(0, 0),
-        MyPosition(0, 0),
-        MyPosition(0, 0),
-    };
+    MyPosition positions[DEPTH_WALKING];
 
     for (int i = 0; i < numberOfTry; i++)
     {
         int scoreOfTry = 0;
-        MyPosition positionOfTry[DEPTH_WALKING] = {
-            MyPosition(0, 0),
-            MyPosition(0, 0),
-            MyPosition(0, 0),
-            MyPosition(0, 0),
-            MyPosition(0, 0),
-        };
+        MyPosition positionOfTry[DEPTH_WALKING];
+
         MyPosition actualPosition = fromPosition;
 
         /// On tente d'avoir un parcours cool
@@ -392,6 +381,39 @@ const Vector2 targets[] = {
     Vector2(0., 0.),
 };
 
+/// Permet d'enlever la premiere position
+void shiftRobotPositionArray()
+{
+    for (int i = 0; i < MAXIMAL_POSITION_ARRAY_LENGTH; i++)
+    {
+        if (i == MAXIMAL_POSITION_ARRAY_LENGTH - 1)
+        {
+            robotPositionArray[i] = nullptr;
+        }
+        else
+        {
+            robotPositionArray[i] = robotPositionArray[i + 1];
+        }
+    }
+}
+
+/// Permet de reremplir le tableau de déplacement du robot
+void pushNewArrayPosition(MyPosition *positionTab)
+{
+    int idPositionTab = 0;
+
+    for (size_t i = 0; i < MAXIMAL_POSITION_ARRAY_LENGTH; i++)
+    {
+        if (robotPositionArray[i] == nullptr && idPositionTab < DEPTH_WALKING)
+        {
+            gladiator->log("NEXT Case : %d:%d", positionTab[i].getX(), positionTab[i].getY());
+            ///@todo jbg
+            /// robotPositionArray[i] = positionTab[idPositionTab];
+            idPositionTab++;
+        }
+    }
+}
+
 void loop()
 {
     if (isFirst)
@@ -409,22 +431,11 @@ void loop()
         gladiator->log("STRAT TEST");
         isFirst = false;
         ///@todo: Voir avec JB
-        MyPosition positionTab[DEPTH_WALKING] = {
-            MyPosition(0, 0),
-            MyPosition(0, 0),
-            MyPosition(0, 0),
-            MyPosition(0, 0),
-            MyPosition(0, 0),
-        };
+        MyPosition positionTab[DEPTH_WALKING];
 
         getRandomPathing(positionTab, ROBOT_POSITION); // @todo Premiere itération ROBOT_POSITION puis derniere case dans robotPositionArray
-
-        for (size_t i = 0; i < DEPTH_WALKING; i++)
-        {
-            /// On ajoute ces positions aux positions que doit parcourir notre robot [robotPositionArray]
-
-            gladiator->log("NEXT Case : %d:%d", positionTab[i].getX(), positionTab[i].getY());
-        }
+        ///@todo jbg
+        pushNewArrayPosition(positionTab);
     }
 
     if (gladiator->game->isStarted())
