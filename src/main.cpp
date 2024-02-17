@@ -104,9 +104,9 @@ void loop()
     }
     i++;
 #else
+    static Timer timer = Timer();
     if (gladiator->game->isStarted())
     {
-        static Timer timer = Timer();
         bool mazeWillShrink = false;
 
         if (timer.hasElapsed())
@@ -129,8 +129,11 @@ void loop()
         }
 
         stateStrategy->next(mazeWillShrink);
-
-#endif
+    }
+    else
+    {
+        timer.reset();
+    }
     delay(10); // boucle à 100Hz
-}
+#endif
 }
