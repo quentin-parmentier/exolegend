@@ -24,9 +24,9 @@ public:
     void resetBasicStrategy();
     MyPosition actualPositionToFind;
     bool shouldSaveMyAss();
+    STATE state;
 
 private:
-    STATE state;
     Navigation *navigation;
     NavigationStack *navigationStack;
     Gladiator *gladiator;
