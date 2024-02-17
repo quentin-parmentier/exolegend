@@ -47,7 +47,15 @@ void NavigationStack::reset()
 
 MyPosition *NavigationStack::getPositionOnTop()
 {
-    std::cout << "CURRENT INDEX :" << currentIndex << "\n";
-    std::cout << "TOP POSITION :" << positions[currentIndex]->getX() << ":" << positions[currentIndex]->getY() << "\n";
+    // std::cout << "CURRENT INDEX :" << currentIndex << "\n";
+    // std::cout << "TOP POSITION :" << positions[currentIndex]->getX() << ":" << positions[currentIndex]->getY() << "\n";
     return positions[currentIndex];
+}
+
+void NavigationStack::printTab()
+{
+    for (int i = 0; i < currentIndex; i++)
+    {
+        std::cout << "POSITION - " << i << " (x:" << positions[i]->getX() << " y:" << positions[i]->getY() << ")\n";
+    }
 }

@@ -119,14 +119,23 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
 {
     int score = 0;
 
-    const int caseAdverse = 50;
-    const int caseNeutre = 20;
     const int caseEquipe = 0;
+    const int caseNeutre = 20;
+    const int caseAdverse = 50;
+
     const int caseRoquette = 20;
+    const int caseBorder = 70;
+
     const int caseDanger = -20;
-    const int caseBorder = 70; /// Regarder qu'on ne l'a pas déjà ? @todo
+    const int caseGoingThrougWall = -100;
+
     const int caseOustide = -500;
-    const int caseGoingThrougWall = -80;
+
+    /// Si la case est à nous --
+    if (ms->possession == gladiator->robot->getData().teamId)
+    {
+        return caseEquipe;
+    }
 
     if (ms == nullptr)
     {
@@ -147,11 +156,6 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
     if (ms->possession == 0)
     {
         score += caseNeutre;
-    }
-    /// Si la case est à nous --
-    else if (ms->possession == gladiator->robot->getData().teamId)
-    {
-        score += caseEquipe;
     }
     /// Si la case est aux autre ++
     else
