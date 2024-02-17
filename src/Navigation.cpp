@@ -110,6 +110,17 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
     // On calcule la vitesse max qu'on peut appliquer en fonction de la distance du point d'arrivée
     float speedValue = speedValueFromDistance(distanceFromStart, distanceFromTarget);
 
+    // Si on doit se retourner pour aller ver sun point, ben on y va en marche arrière, c'ets plus simple
+    if (angleError > (M_PI / 2.)) {
+        angleError -= M_PI;
+        speedValue = -speedValue;
+    }
+
+    if (angleError < (-M_PI / 2.)) {
+        angleError += M_PI;
+        speedValue = -speedValue;
+    }
+
     // On calcule la rotation qu'on doit appliquer en fonction de l'angle qu'on a par rapport à l'arrivée
     float rotationOffset = rotationOffsetFromAngleError(angleError);
 
