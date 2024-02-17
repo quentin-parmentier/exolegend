@@ -22,6 +22,7 @@ public:
     void useBasicStrategy();
     void useSaveStrategy();
     void useRocketStrategy();
+    void useSpinStrategy();
     void next(bool mazeWillShrink);
     void resetBasicStrategy();
     MyPosition actualPositionToFind;
@@ -29,8 +30,8 @@ public:
 
 private:
     STATE state;
-    Navigation *navigation;
     RobotsData *robotsData;
+    Navigation *navigation;
     NavigationStack *navigationStack;
     Gladiator *gladiator;
     NavigationStrategy *navigationStrategy;

@@ -22,6 +22,8 @@ int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
 const MazeSquare ***maze;
 const int DEPTH_WALKING = 5;
 
+bool isFirst = true;
+
 Gladiator *gladiator;
 Navigation *navigation;
 StateStrategy *stateStrategy;
@@ -55,6 +57,7 @@ void reset()
             maze[x][y] = msq;
         }
     }
+    isFirst = true;
 
     const MazeSquare *initialMazeSquare = gladiator->maze->getNearestSquare();
     ROBOT_POSITION = MyPosition(initialMazeSquare->i, initialMazeSquare->j);

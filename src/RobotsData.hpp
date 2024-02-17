@@ -3,6 +3,7 @@
 
 #include <gladiator.h>
 #include <cmath>
+#include "utils.hpp"
 
 /**
  * @brief Repréente une file de navigation (FIFO)
@@ -22,16 +23,20 @@ public:
      * @brief Update Data about the different actors
      *
      */
-    updateOtherData();
+    void updateOtherData();
     /**
      * @brief Update Data about the different actors
      *
      */
     isEnemyClose(float range);
+    void init();
     RobotData me;
     RobotData coop;
     RobotData comp1;
     RobotData comp2;
+    byte comp1ID;
+    byte comp2ID;
+    byte coopID;
 
 private:
     Gladiator *gladiator;

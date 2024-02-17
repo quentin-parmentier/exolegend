@@ -34,7 +34,10 @@ void StateStrategy::next(bool mazeWillShrink)
     {
         state = STATE::SAVE;
     }else if(robotsData->isEnemyClose(0.4)){
+        // gladiator->log("defend");
         state = STATE::DEFEND;
+    }else if(state != STATE::BASIC){
+        state = STATE::BASIC;
     }
 
     /// On fait l'action en fonction de l'état
@@ -44,7 +47,7 @@ void StateStrategy::next(bool mazeWillShrink)
     }
     else if (state == STATE::DEFEND)
     {
-        // ajouter toupie 
+        useSpinStrategy();
     }
     else if (state == STATE::SAVE)
     {
@@ -72,6 +75,10 @@ void StateStrategy::useBasicStrategy()
         navigationStrategy->computeRandomPathing(*positionOnTop);
     }
 };
+
+void StateStrategy::useSpinStrategy(){
+    navigation->spin();
+}
 
 void StateStrategy::useSaveStrategy()
 {
