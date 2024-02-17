@@ -4,19 +4,21 @@
 #include "Navigation.hpp"
 #include "NavigationStack.hpp"
 #include "NavigationStrategy.hpp"
+#include "RobotsData.hpp"
 
 enum STATE
 {
     BASIC,
     SAVE,
     ROCKET,
+    DEFEND
 };
 
 class StateStrategy
 {
 
 public:
-    StateStrategy(STATE baseState, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength);
+    StateStrategy(STATE baseState, RobotsData *robotsData, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength);
     void useBasicStrategy();
     void useSaveStrategy();
     void useRocketStrategy();
@@ -28,6 +30,7 @@ public:
 private:
     STATE state;
     Navigation *navigation;
+    RobotsData *robotsData;
     NavigationStack *navigationStack;
     Gladiator *gladiator;
     NavigationStrategy *navigationStrategy;

@@ -1,8 +1,9 @@
 #include "StateStrategy.hpp"
 #include "MyPosition.hpp"
+#include "RobotsData.hpp"
 #include "utils.hpp"
 
-StateStrategy::StateStrategy(STATE baseState, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength) : state(baseState), navigation(navigation),
+StateStrategy::StateStrategy(STATE baseState, RobotsData *robotsData, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength) : state(baseState), robotsData(robotsData), navigation(navigation),
                                                                                                                                                                                                                                                           navigationStack(navigationStack),
                                                                                                                                                                                                                                                           gladiator(gladiator), navigationStrategy(navigationStrategy), mazeHeight(mazeHeight),
                                                                                                                                                                                                                                                           mazeLength(mazeLength), originalMazeHeight(originalMazeHeight),
@@ -30,12 +31,18 @@ void StateStrategy::next(bool mazeWillShrink)
     if (mazeWillShrink && shouldSaveMyAss())
     {
         state = STATE::SAVE;
+    }else if(robotsData->isEnemyClose(0.4)){
+        state = STATE::DEFEND;
     }
 
     /// On fait l'action en fonction de l'état
     if (state == STATE::BASIC)
     {
         useBasicStrategy();
+    }
+    else if (state == STATE::DEFEND)
+    {
+        // ajouter toupie 
     }
     else if (state == STATE::SAVE)
     {
@@ -70,7 +77,7 @@ void StateStrategy::useSaveStrategy(){
 };
 
 void StateStrategy::useRocketStrategy(){
-    if(gladiator->weapon->canLaunchRocket){
+    if(gladiator->weapon->canLaunchRocket()){
         gladiator->weapon->launchRocket();
     }
 };

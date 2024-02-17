@@ -11,6 +11,7 @@
 #include "NavigationStack.hpp"
 #include "NavigationStrategy.hpp"
 #include "StateStrategy.hpp"
+#include "RobotsData.hpp"
 
 #undef abs
 
@@ -24,6 +25,7 @@ const int DEPTH_WALKING = 5;
 Gladiator *gladiator;
 Navigation *navigation;
 StateStrategy *stateStrategy;
+RobotsData *robotsData;
 
 MyPosition ROBOT_POSITION = MyPosition(0, 0);
 
@@ -75,9 +77,10 @@ void setup()
     gladiator->game->onReset(&reset);
     // gladiator->game->enableFreeMode(RemoteMode::OFF);
     navigation = new Navigation(gladiator);
+    robotsData = new RobotsData(gladiator);
     navigationStack = new NavigationStack(MAXIMAL_POSITION_ARRAY_LENGTH);
     navigationStrategy = new NavigationStrategy(navigationStack, gladiator, DEPTH_WALKING, maze, &ACTUAL_MAZE_HEIGHT, &ACTUAL_MAZE_LENGTH, MAZE_HEIGHT, MAZE_LENGTH);
-    stateStrategy = new StateStrategy(STATE::BASIC, navigation, navigationStack, gladiator, navigationStrategy,
+    stateStrategy = new StateStrategy(STATE::BASIC, robotsData, navigation, navigationStack, gladiator, navigationStrategy,
                                       MAZE_HEIGHT,
                                       MAZE_LENGTH,
                                       &ACTUAL_MAZE_HEIGHT,
@@ -106,7 +109,7 @@ void loop()
     {
         static Timer timer = Timer();
         bool mazeWillShrink = false;
-
+    
         if (timer.hasElapsed())
         {
             ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;
@@ -124,6 +127,8 @@ void loop()
         else if (timer.mightSaveHisAss())
         {
             mazeWillShrink = true;
+        }else if(timer.enemyUpdate()){
+            robotsData->updateOtherData();
         }
 
         stateStrategy->next(mazeWillShrink);
