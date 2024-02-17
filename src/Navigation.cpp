@@ -7,6 +7,12 @@ Navigation::Navigation(Gladiator* gladiator): gladiator(gladiator) {
     lastState = NAVIGATION_TARGET_STATE::NOT_SET;
 }
 
+void Navigation::reset (){
+    startPosition = Vector2(0, 0);
+    previousTargetPosition = Vector2(0, 0);
+    lastState = NAVIGATION_TARGET_STATE::NOT_SET;
+}
+
 inline float Navigation::rotationOffsetFromAngleError(float angleOffset) {
     // Seuil en dessous duquel on considère qu'on a pas besoin de corriger l'angle
     constexpr float ANGLE_REACHED_THRESHOLD = 2. * (M_PI/180.f); // 2° de tolérance
@@ -72,6 +78,7 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
             gladiator->log("New target x %f, y %f ; current pos x %f, y %f", previousTargetPosition.x(), previousTargetPosition.y(), startPosition.x(), startPosition.y());
         }
     } else if (lastState == NAVIGATION_TARGET_STATE::REACHED) {
+        gladiator->log("Target %d reached", target);
         return lastState;
     }
 

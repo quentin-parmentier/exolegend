@@ -17,6 +17,7 @@ class Navigation {
     public:
         Navigation(Gladiator *gladiator);
         NAVIGATION_TARGET_STATE driveTo(const Vector2 &target, bool showLogs = false);
+        void reset();
 
     private:
         /**

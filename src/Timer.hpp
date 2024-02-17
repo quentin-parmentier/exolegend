@@ -13,7 +13,7 @@ private:
 public:
     Timer();
     bool hasElapsed();
-
+    bool mazeWillShrink();
     void reset();
 };
 
