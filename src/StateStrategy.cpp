@@ -4,10 +4,10 @@
 #include "utils.hpp"
 
 StateStrategy::StateStrategy(STATE baseState, RobotsData *robotsData, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength) : state(baseState), robotsData(robotsData), navigation(navigation),
-                                                                                                                                                                                                                                                          navigationStack(navigationStack),
-                                                                                                                                                                                                                                                          gladiator(gladiator), navigationStrategy(navigationStrategy), originalMazeHeight(originalMazeHeight),
-                                                                                                                                                                                                                                                          originalMazeLength(originalMazeLength), mazeHeight(mazeHeight),
-                                                                                                                                                                                                                                                          mazeLength(mazeLength)
+                                                                                                                                                                                                                                                                                  navigationStack(navigationStack),
+                                                                                                                                                                                                                                                                                  gladiator(gladiator), navigationStrategy(navigationStrategy), originalMazeHeight(originalMazeHeight),
+                                                                                                                                                                                                                                                                                  originalMazeLength(originalMazeLength), mazeHeight(mazeHeight),
+                                                                                                                                                                                                                                                                                  mazeLength(mazeLength)
 {
     actualPositionToFind = MyPosition();
     savePosition = MyPosition();
@@ -33,11 +33,23 @@ void StateStrategy::next(bool mazeWillShrink)
     if (mazeWillShrink && state != STATE::SAVE && shouldSaveMyAss())
     {
         state = STATE::SAVE;
-    }else if(robotsData->isEnemyClose(0.4)){
+    }
+    else if (robotsData->isEnemyClose(0.4))
+    {
         // gladiator->log("defend");
         state = STATE::DEFEND;
-    }else if(state != STATE::BASIC){
+    }
+    else if (state != STATE::BASIC)
+    {
         state = STATE::BASIC;
+    }
+    else if (shouldLaunchRocket(actualPositionToFind))
+    {
+        state = STATE::ROCKET;
+    }
+    else if (shouldLaunchRocket(actualPositionToFind))
+    {
+        state = STATE::ROCKET;
     }
 
     /// On fait l'action en fonction de l'état
@@ -55,6 +67,7 @@ void StateStrategy::next(bool mazeWillShrink)
     }
     else if (state == STATE::ROCKET)
     {
+        useRocketStrategy();
     }
 }
 
@@ -76,7 +89,8 @@ void StateStrategy::useBasicStrategy()
     }
 };
 
-void StateStrategy::useSpinStrategy(){
+void StateStrategy::useSpinStrategy()
+{
     navigation->spin();
 }
 
@@ -113,10 +127,26 @@ void StateStrategy::useSaveStrategy()
 };
 
 void StateStrategy::useRocketStrategy(){
-    if(gladiator->weapon->canLaunchRocket()){
-        gladiator->weapon->launchRocket();
-    }
+    /// Se tourne vers la cible
+
+    /// Lance la roquette
 };
+
+bool StateStrategy::shouldLaunchRocket(MyPosition nextPosition)
+{
+    /// Si on a déjà une roquette et qu'on va en récupérer une => On launch
+    if (gladiator->maze->getSquare(nextPosition.getX(), nextPosition.getY())->coin.value > 0 && gladiator->weapon->canLaunchRocket())
+    {
+        return true;
+    }
+    /// Si on est près d'un ennemie (simple ?) on launch
+    else if (false)
+    {
+        return true;
+    }
+
+    return false;
+}
 
 bool StateStrategy::shouldSaveMyAss()
 {

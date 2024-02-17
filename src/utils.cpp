@@ -47,7 +47,27 @@ MyPosition getNearestValidPosition(int robotX, int robotY, int originalMazeHeigh
     return nearestPosition;
 }
 
+float calculerAngle(Position position1, Position position2)
+{
+    // Calcul de la différence entre les coordonnées x et y des deux robots
+    float deltaX = position2.x - position1.x;
+    float deltaY = position2.y - position1.y;
+
+    // Utilisation de la fonction atan2 pour calculer l'angle
+    float angle = std::atan2(deltaY, deltaX);
+
+    // Conversion de l'angle de radians à degrés si nécessaire
+    // angle = angle * 180 / M_PI; // Décommentez cette ligne si vous souhaitez l'angle en degrés
+
+    return angle;
+}
+
 float distance(MyPosition pos1, MyPosition pos2)
 {
     return std::sqrt(std::pow(pos1.getX() - pos2.getX(), 2) + std::pow(pos1.getY() - pos2.getY(), 2));
+}
+
+float distanceFromPosition(Position pos1, Position pos2)
+{
+    return std::sqrt(std::pow(pos1.x - pos2.x, 2) + std::pow(pos1.y - pos2.y, 2));
 }

@@ -27,6 +27,7 @@ public:
     void resetBasicStrategy();
     MyPosition actualPositionToFind;
     bool shouldSaveMyAss();
+    bool shouldLaunchRocket(MyPosition nextPosition);
     STATE state;
 
 private:
