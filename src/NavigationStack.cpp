@@ -27,7 +27,7 @@ MyPosition NavigationStack::shift()
     MyPosition p = *positions[0];
     for (int i = 0; i < currentIndex; i++)
     {
-        positions[i] = positions[i + 1];
+        *positions[i] = *positions[i + 1];
     }
     currentIndex--;
 
@@ -37,7 +37,7 @@ MyPosition NavigationStack::shift()
 void NavigationStack::push(MyPosition pos)
 {
     currentIndex++;
-    std::cout << "Ajoute une case -" << currentIndex << " POS :" << pos.getX() << ":" << pos.getY() << "\n";
+    std::cout << "Ajoute une case - " << currentIndex << " POS :" << pos.getX() << ":" << pos.getY() << "\n";
     positions[currentIndex]->copy(pos);
 }
 
@@ -49,7 +49,7 @@ void NavigationStack::reset()
 void NavigationStack::simplify()
 {
     std::cout << "start SIpmlify \n";
-    positionsTemp[0] = positions[0];
+    *positionsTemp[0] = *positions[0];
     int tableposition = 0;
 
     // iterate over X
@@ -66,15 +66,15 @@ void NavigationStack::simplify()
         else
         {
             tableposition++;
-            positionsTemp[tableposition] = positions[i];
+            *positionsTemp[tableposition] = *positions[i];
         }
     }
     tableposition++;
-    positionsTemp[tableposition] = positions[currentIndex];
+    *positionsTemp[tableposition] = *positions[currentIndex];
     currentIndex = tableposition;
     for (int i = 0; i <= currentIndex; i++)
     {
-        positions[i] = positionsTemp[i];
+        *positions[i] = *positionsTemp[i];
     }
     std::cout << "end SIpmlify \n";
 }

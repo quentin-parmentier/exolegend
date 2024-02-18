@@ -9,15 +9,15 @@ NavigationStrategy::NavigationStrategy(NavigationStack *navigationStack, Gladiat
 void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
 {
     // Si on a encore assez de chemin faire on calcule pas de nouveau chemin
-    if (navigationStack->spaceLeft() < depthWalking)
+    if (navigationStack->hasNext())
     {
-        gladiator->log("On a pas encore de place");
+        gladiator->log("On a pas encore tout depile");
         return;
     }
 
     gladiator->log("On relance une recherche");
 
-    const int numberOfTry = 50;
+    const int numberOfTry = 75;
     int maxScore = 0;
     /// On va ignorer la premiere direction parce que c'est compliqué de savoir dans x pas à combien on sera @todo
     Direction lastDirection = Direction::RIGHT;
@@ -127,16 +127,16 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
     int score = 0;
 
     const int caseEquipe = 0;
-    const int caseNeutre = 20;
+    const int caseNeutre = 30;
     const int caseAdverse = 50;
 
-    const int caseRoquette = 20;
-    const int caseBorder = 70;
+    const int caseRoquette = 0;
+    const int caseBorder = 40;
 
     const int caseDanger = -20;
-    const int caseGoingThrougWall = -100;
+    const int caseGoingThrougWall = -300;
 
-    const int caseOustide = -500;
+    const int caseOustide = -1000;
 
     if (ms == nullptr)
     {

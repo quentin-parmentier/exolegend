@@ -20,7 +20,7 @@ const int MAZE_LENGTH = 12; // x
 int ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
 int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
 const MazeSquare ***maze;
-const int DEPTH_WALKING = 5;
+const int DEPTH_WALKING = 10;
 
 bool isFirst = true;
 

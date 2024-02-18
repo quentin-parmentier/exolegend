@@ -69,10 +69,10 @@ void StateStrategy::useBasicStrategy()
         gladiator->log("Target %d:%d reached", actualPositionToFind.getX(), actualPositionToFind.getY());
 
         /// On regarde la prochaine position à aller voir
-        actualPositionToFind = navigationStack->shift();
-        MyPosition *positionOnTop = navigationStack->getPositionOnTop();
-        gladiator->log("Nouvelle target %d:%d", positionOnTop->getX(), positionOnTop->getY());
-        navigationStrategy->computeRandomPathing(*positionOnTop);
+        if (navigationStack->hasNext()) {
+            actualPositionToFind = navigationStack->shift();
+        }
+        navigationStrategy->computeRandomPathing(actualPositionToFind);
     }
 };
 
