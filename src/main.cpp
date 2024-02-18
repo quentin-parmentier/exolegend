@@ -20,7 +20,7 @@ const int MAZE_LENGTH = 12; // x
 int ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
 int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
 const MazeSquare ***maze;
-const int DEPTH_WALKING = 10;
+const int DEPTH_WALKING = 12;
 
 bool isFirst = true;
 
@@ -114,11 +114,12 @@ void loop()
     if (gladiator->game->isStarted())
     {
         bool mazeWillShrink = false;
-        if(isFirst){
+        if (isFirst)
+        {
             robotsData->init();
-            isFirst= false;
+            isFirst = false;
         }
-    
+
         if (timer.hasElapsed())
         {
             ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;

@@ -17,7 +17,7 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
 
     gladiator->log("On relance une recherche");
 
-    const int numberOfTry = 50;
+    const int numberOfTry = 65;
     int maxScore = 0;
     /// On va ignorer la premiere direction parce que c'est compliqué de savoir dans x pas à combien on sera @todo
     Direction lastDirection = Direction::RIGHT;
@@ -133,13 +133,13 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
     const int caseNeutre = 10;
     const int caseAdverse = 20;
 
-    const int caseRoquette = 40;
+    const int caseRoquette = 50;
     const int caseBorder = 40;
 
     const int caseDanger = -20;
     const int caseGoingThrougWall = -300;
 
-    const int caseOustide = -1000;
+    const int caseOustide = -10000;
 
     if (ms == nullptr)
     {
@@ -229,7 +229,7 @@ Direction NavigationStrategy::getRandomDirection(Direction lastDirection, bool t
     Direction nextDirection = static_cast<Direction>(rand_index);
 
     // Si on retourne directe sur la case d'avant, on essaye d'avancer plutot avec une probabilité de 30%
-    if (tryToGoForward && getReverseDirection(nextDirection) == lastDirection && (random() % 10) <= 5)
+    if (tryToGoForward && getReverseDirection(nextDirection) == lastDirection && (random() % 10) <= 3)
     {
         nextDirection = lastDirection; //@todo a remettre
     }

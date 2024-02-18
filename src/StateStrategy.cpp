@@ -23,13 +23,14 @@ void StateStrategy::resetBasicStrategy()
     const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
     gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
     navigationStrategy->computeRandomPathing(actualRobotPosition);
+    navigationStack->printTab();
     state = STATE::BASIC;
 }
 
 void StateStrategy::next(bool mazeWillShrink)
 {
     /// On fait les différents checks
-    if (mazeWillShrink && state != STATE::SAVE)
+    if (mazeWillShrink)
     {
         gladiator->log("On doit se sauver");
         state = STATE::SAVE;
@@ -80,7 +81,7 @@ void StateStrategy::next(bool mazeWillShrink)
     }
     else if (state == STATE::SAVE)
     {
-        useSaveStrategy();
+        useSaveStrategy(mazeWillShrink);
     }
     else if (state == STATE::ROCKET)
     {
@@ -132,7 +133,7 @@ void StateStrategy::useEsquiveStrategy()
     }
 }
 
-void StateStrategy::useSaveStrategy()
+void StateStrategy::useSaveStrategy(bool mazeWillShrink)
 {
     /// On fonce vers le milieu tant que notre position n'est pas safe
     float milieu = gladiator->maze->getSquareSize() * 6;

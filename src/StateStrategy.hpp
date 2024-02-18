@@ -21,7 +21,7 @@ class StateStrategy
 public:
     StateStrategy(STATE baseState, RobotsData *robotsData, Navigation *navigation, NavigationStack *navigationStack, Gladiator *gladiator, NavigationStrategy *navigationStrategy, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength);
     void useBasicStrategy();
-    void useSaveStrategy();
+    void useSaveStrategy(bool mazeWillShrink);
     void useRocketStrategy();
     void useSpinStrategy();
     void useEsquiveStrategy();
