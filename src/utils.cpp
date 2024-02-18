@@ -21,8 +21,8 @@ MyPosition getNearestValidPosition(int robotX, int robotY, int originalMazeHeigh
     /// On parcours tous les bords du terrain
     int minX = (originalMazeLength - nextMazeLength) / 2;
     int minY = (originalMazeHeight - nextMazeHeight) / 2;
-    int maxX = nextMazeLength - 1;
-    int maxY = nextMazeHeight - 1;
+    int maxX = minX + nextMazeLength;
+    int maxY = minY + nextMazeHeight;
 
     MyPosition robotPos = MyPosition(robotX, robotY);
 
