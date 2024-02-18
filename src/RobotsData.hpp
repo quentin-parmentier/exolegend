@@ -24,7 +24,7 @@ public:
      * @brief Update Data about the different actors
      *
      */
-    isEnemyClose(float range);
+    bool isEnemyClose(float range);
     RobotData getClosestEnnemy();
     void init();
     byte coop[2];

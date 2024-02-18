@@ -59,7 +59,7 @@ void RobotsData::init()
     }
 }
 
-RobotsData::isEnemyClose(float range)
+bool RobotsData::isEnemyClose(float range)
 {
     /// enemy 1
     if (comp[0] != 0 && gladiator->game->getOtherRobotData(comp[0]).lifes > 0 && sqrt(sq(gladiator->game->getOtherRobotData(comp[0]).position.x - gladiator->robot->getData().position.x) + sq(gladiator->game->getOtherRobotData(comp[0]).position.y - gladiator->robot->getData().position.y)) < range)

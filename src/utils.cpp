@@ -8,13 +8,9 @@ float moduloPi(float a) // return angle in [-pi; pi]
 
 bool checkIfIsOutside(int x, int y, int originalMazeHeight, int originalMazeLength, int *mazeHeight, int *mazeLength)
 {
-
-    if (x < (originalMazeLength - (*mazeLength)) / 2 || x >= (*mazeLength) || y < (originalMazeHeight - (*mazeHeight)) / 2 || y >= (*mazeHeight))
-    {
-        return true;
-    }
-
-    return false;
+    int xoffset = (originalMazeLength - *mazeLength) / 2;
+    int yoffset = (originalMazeHeight - *mazeHeight) / 2;
+    return x < xoffset || y < yoffset || x >= (xoffset + *mazeLength) || y >= (yoffset + *mazeHeight);
 }
 
 MyPosition getNearestValidPosition(int robotX, int robotY, int originalMazeHeight, int originalMazeLength, int nextMazeHeight, int nextMazeLength)
