@@ -47,10 +47,6 @@ void StateStrategy::next(bool mazeWillShrink)
     {
         state = STATE::ROCKET;
     }
-    else if (shouldLaunchRocket(actualPositionToFind))
-    {
-        state = STATE::ROCKET;
-    }
 
     /// On fait l'action en fonction de l'état
     if (state == STATE::BASIC)
@@ -126,10 +122,21 @@ void StateStrategy::useSaveStrategy()
     }
 };
 
-void StateStrategy::useRocketStrategy(){
+void StateStrategy::useRocketStrategy()
+{
+    RobotData closestEnnemy = robotsData->getClosestEnnemy();
+
+    gladiator->log("ENNEMY LE PLUS PROCHE : %f:%f", closestEnnemy.position.x, closestEnnemy.position.y);
+    /// On récupère l'angle
+    float angleRadian = calculerAngle(gladiator->robot->getData().position, closestEnnemy.position);
     /// Se tourne vers la cible
 
-    /// Lance la roquette
+    if (navigation->face(angleRadian))
+    {
+        /// Lance la roquette
+        gladiator->weapon->launchRocket();
+        state = STATE::BASIC;
+    }
 };
 
 bool StateStrategy::shouldLaunchRocket(MyPosition nextPosition)
@@ -140,7 +147,7 @@ bool StateStrategy::shouldLaunchRocket(MyPosition nextPosition)
         return true;
     }
     /// Si on est près d'un ennemie (simple ?) on launch
-    else if (false)
+    if (robotsData->isEnemyClose(gladiator->maze->getSquareSize() * 5))
     {
         return true;
     }

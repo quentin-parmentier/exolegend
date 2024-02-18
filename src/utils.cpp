@@ -71,3 +71,50 @@ float distanceFromPosition(Position pos1, Position pos2)
 {
     return std::sqrt(std::pow(pos1.x - pos2.x, 2) + std::pow(pos1.y - pos2.y, 2));
 }
+
+bool isCloseEnoughToEnnemy(Position ennemy1, Position ennemy2, Position myPosition, float threshold)
+{
+    if (distanceFromPosition(ennemy1, myPosition) < threshold || distanceFromPosition(ennemy2, myPosition))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+RobotData getClosestRobotData(RobotData robotData1, RobotData robotData2, Position myPosition)
+{
+    Position rp1 = robotData1.position;
+    Position rp2 = robotData2.position;
+
+    float drp1 = distanceFromPosition(rp1, myPosition);
+    float drp2 = distanceFromPosition(rp2, myPosition);
+
+    if (drp1 < drp2)
+    {
+        return robotData1;
+    }
+
+    return robotData2;
+}
+
+RobotData *getEnnemiesData(Gladiator *gladiator, RobotData ennemies[2])
+{
+    RobotData myRobotData = gladiator->robot->getData();
+    uint8_t myTeam = myRobotData.teamId;
+
+    RobotList robotList = gladiator->game->getPlayingRobotsId();
+
+    int id = 0;
+    for (size_t i = 0; i < 3; i++)
+    {
+        RobotData robotData = gladiator->game->getOtherRobotData(robotList.ids[i]);
+        if (robotData.teamId != myTeam)
+        {
+            ennemies[id] = robotData;
+            id++;
+        }
+    }
+
+    return ennemies;
+}

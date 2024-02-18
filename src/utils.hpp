@@ -13,4 +13,8 @@ MyPosition getNearestValidPosition(int robotX, int robotY, int originalMazeHeigh
 float distance(MyPosition pos1, MyPosition pos2);
 float distanceFromPosition(Position pos1, Position pos2);
 float calculerAngle(Position position1, Position position2);
+bool isCloseEnoughToEnnemy(Position ennemy1, Position ennemy2, Position myPosition, float threshold);
+RobotData getClosestRobotData(RobotData robotData1, RobotData robotData2, Position myPosition);
+RobotData *getEnnemiesData(Gladiator *gladiator, RobotData ennemies[2]);
+
 #endif
