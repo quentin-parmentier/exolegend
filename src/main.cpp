@@ -114,6 +114,10 @@ void loop()
     if (gladiator->game->isStarted())
     {
         bool mazeWillShrink = false;
+        if(isFirst){
+            robotsData->init();
+            isFirst= false;
+        }
     
         if (timer.hasElapsed())
         {
@@ -135,8 +139,6 @@ void loop()
         else if (timer.mightSaveHisAss())
         {
             mazeWillShrink = true;
-        }else if(timer.enemyUpdate()){
-            robotsData->updateOtherData();
         }
 
         stateStrategy->next(mazeWillShrink);

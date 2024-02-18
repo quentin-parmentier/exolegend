@@ -19,24 +19,15 @@ public:
      * @param teamId
      */
     RobotsData(Gladiator *gladiator);
-    /**
-     * @brief Update Data about the different actors
-     *
-     */
-    void updateOtherData();
+
     /**
      * @brief Update Data about the different actors
      *
      */
     isEnemyClose(float range);
     void init();
-    RobotData me;
-    RobotData coop;
-    RobotData comp1;
-    RobotData comp2;
-    byte comp1ID;
-    byte comp2ID;
-    byte coopID;
+    byte coop[2];
+    byte comp[2];
 
 private:
     Gladiator *gladiator;

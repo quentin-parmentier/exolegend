@@ -26,49 +26,53 @@ RobotsData::RobotsData(Gladiator *gladiator) : gladiator(gladiator)
     // }
 }
 
-void RobotsData::init(){
-    me = gladiator->robot->getData();
-    comp1ID = 8;
-    comp2ID = 8;
-    gladiator->log("Robot id=%d",me.id);
+void RobotsData::init()
+{
+    
+    coop[0] = gladiator->robot->getData().id;
+
+    // gladiator->log("Robot id=%d", me.id);
     for (uint8_t id : gladiator->game->getPlayingRobotsId().ids)
     {
-        gladiator->log("Robot id=%d",id);
         int advers = 0;
         RobotData ret{};
-        if (id != me.id)
+        if (id != coop[0])
         {
-            gladiator->log("Robot id=%d",id);
             // on prend celui dont l'id est différent du robot actuel
             ret = gladiator->game->getOtherRobotData(id); // 4.3.3
-            if(ret.teamId != me.teamId){
-                if(advers == 0) comp1ID=ret.id;
-                else comp2ID=ret.id;
+            if (ret.teamId != gladiator->robot->getData().teamId)
+            {
+                if (advers == 0)
+                    comp[0] = ret.id;
+                else
+                    comp[1] = ret.id;
                 advers++;
-
-            }else{
-                coopID = ret.id;
+            }
+            else
+            {
+                coop[1] = ret.id;
             }
         }
     }
 }
 
-void RobotsData::updateOtherData()
-{
-    if(comp1ID) comp1 = gladiator->game->getOtherRobotData(comp1ID);    
-    // std::cout << "comp" << comp1.id <<"\n";
-    // gladiator->log(comp1.id);
-    if(comp2ID) comp2 = gladiator->game->getOtherRobotData(comp2ID);
-    if(coopID) coop = gladiator->game->getOtherRobotData(coopID);
-}
 
-RobotsData::isEnemyClose(float range){
+RobotsData::isEnemyClose(float range)
+{
     /// enemy 1
-    if(comp1ID != 8 && comp1.lifes> 0 && sqrt( sq( comp1.position.x - me.position.x ) + sq( comp1.position.y - me.position.y ) ) < range ){
+    if ( gladiator->game->getOtherRobotData(comp[0]).lifes > 0 && sqrt(sq(gladiator->game->getOtherRobotData(comp[0]).position.x - gladiator->robot->getData().position.x) + sq(gladiator->game->getOtherRobotData(comp[0]).position.y - gladiator->robot->getData().position.y)) < range)
+    {
+        gladiator->log("enemy %d in range", comp[0]);
         return true;
-    }else if(comp2ID !=8 && comp2.lifes && distance(MyPosition(comp1.position.x, comp1.position.y), MyPosition(me.position.x, me.position.y) ) < range){ 
+        // }else if(comp2ID !=8 && comp2.lifes > 0 && distance(MyPosition(comp1.position.x, comp1.position.y), MyPosition(me.position.x, me.position.y) ) < range){
+    }
+    else if ( gladiator->game->getOtherRobotData(comp[1]).lifes > 0 && sqrt(sq(gladiator->game->getOtherRobotData(comp[1]).position.x - gladiator->robot->getData().position.x) + sq(gladiator->game->getOtherRobotData(comp[1]).position.y - gladiator->robot->getData().position.y))  < range)
+    {
+        gladiator->log("enemy %d in range", comp[1]);
         return true;
-     }else{
+    }
+    else
+    {
         return false;
-     }
+    }
 }
