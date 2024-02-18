@@ -129,7 +129,7 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
 {
     int score = 0;
 
-    const int caseEquipe = 0;
+    const int caseEquipe = -20;
     const int caseNeutre = 10;
     const int caseAdverse = 20;
 
