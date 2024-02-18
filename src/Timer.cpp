@@ -1,12 +1,12 @@
 #include "Timer.hpp"
 
-Timer::Timer() : lastTime(std::chrono::steady_clock::now()) {}
+Timer::Timer(int timeToWait) : lastTime(std::chrono::steady_clock::now()), timeToWait(timeToWait) {}
 
 bool Timer::hasElapsed()
 {
     auto currentTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - lastTime).count();
-    return elapsedTime >= TIME_FOR_NEW_WALL;
+    return elapsedTime >= timeToWait;
 }
 
 bool Timer::mightSaveHisAss()

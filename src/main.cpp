@@ -23,6 +23,7 @@ const MazeSquare ***maze;
 const int DEPTH_WALKING = 10;
 
 bool isFirst = true;
+bool firstTimerElapsed = false;
 
 Gladiator *gladiator;
 Navigation *navigation;
@@ -66,6 +67,7 @@ void reset()
 
     navigationStrategy->computeRandomPathing(ROBOT_POSITION); // @todo Premiere itération ROBOT_POSITION puis derniere case dans robotPositionArray
     stateStrategy->actualPositionToFind = navigationStack->shift();
+    firstTimerElapsed = false;
 }
 
 void setup()
@@ -110,20 +112,24 @@ void loop()
     }
     i++;
 #else
-    static Timer timer = Timer();
+    static Timer timer18sec = Timer(18);
+    static Timer timer20sec = Timer(20);
     if (gladiator->game->isStarted())
     {
-        bool mazeWillShrink = false;
         if(isFirst){
             robotsData->init();
-            isFirst= false;
+            isFirst = false;
         }
     
-        if (timer.hasElapsed())
+        if (
+            (!firstTimerElapsed && timer18sec.hasElapsed()) ||
+            (firstTimerElapsed && timer20sec.hasElapsed())
+        )
         {
             ACTUAL_MAZE_HEIGHT = ACTUAL_MAZE_HEIGHT - 2;
             ACTUAL_MAZE_LENGTH = ACTUAL_MAZE_LENGTH - 2;
-            timer.reset();
+            firstTimerElapsed = true;
+            timer20sec.reset();
 
             if (stateStrategy->state != STATE::SAVE)
             {
@@ -133,19 +139,16 @@ void loop()
             }
             else
             {
-                gladiator->log("On essaye de se barrer");
+                gladiator->log("On essaye toujours de se barrer");
             }
         }
-        else if (timer.mightSaveHisAss())
-        {
-            mazeWillShrink = true;
-        }
 
-        stateStrategy->next(mazeWillShrink);
+        stateStrategy->next(false);
     }
     else
     {
-        timer.reset();
+        timer18sec.reset();
+        timer20sec.reset();
     }
     delay(10); // boucle à 100Hz
 #endif

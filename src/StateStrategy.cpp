@@ -28,8 +28,9 @@ void StateStrategy::resetBasicStrategy()
 void StateStrategy::next(bool mazeWillShrink)
 {
     /// On fait les différents checks
-    if (mazeWillShrink && shouldSaveMyAss())
+    if (shouldSaveMyAss())
     {
+        gladiator->log("tu devrais te sauver");
         state = STATE::SAVE;
     }
     else if (shouldLaunchRocket(actualPositionToFind))
@@ -43,6 +44,7 @@ void StateStrategy::next(bool mazeWillShrink)
     }
     else if (state != STATE::BASIC)
     {
+        gladiator->log("state != STATE::BASIC");
         resetBasicStrategy();
         state = STATE::BASIC;
     }
@@ -98,8 +100,8 @@ void StateStrategy::useSaveStrategy()
         /// On trouve la case la plus proche
         const MazeSquare *msq = gladiator->maze->getNearestSquare();
 
-        int nextMazeHeight = (*mazeHeight - 2);
-        int nextMazeLength = (*mazeLength - 2);
+        int nextMazeHeight = (*mazeHeight);
+        int nextMazeLength = (*mazeLength);
         savePosition = getNearestValidPosition(msq->i, msq->j, originalMazeHeight, originalMazeLength, nextMazeHeight, nextMazeLength);
 
         gladiator->log("On est en : %d:%d", msq->i, msq->j);
@@ -160,10 +162,11 @@ bool StateStrategy::shouldLaunchRocket(MyPosition nextPosition)
 bool StateStrategy::shouldSaveMyAss()
 {
     const MazeSquare *msq = gladiator->maze->getNearestSquare();
+    gladiator->log("shouldSaveMyAss %d:%d", msq->i, msq->j);
     /// Est-ce qu'on va être en dehors des limites ?
     /// -2 parce qu'on fait comme si y'avait
-    int nextMazeHeight = (*mazeHeight - 2);
-    int nextMazeLength = (*mazeLength - 2);
+    int nextMazeHeight = (*mazeHeight);
+    int nextMazeLength = (*mazeLength);
 
     return checkIfIsOutside(msq->i, msq->j, originalMazeHeight, originalMazeLength, &nextMazeHeight, &nextMazeLength);
 }

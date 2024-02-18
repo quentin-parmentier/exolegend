@@ -114,12 +114,6 @@ bool NavigationStrategy::isOutside(int x, int y)
                             originalMazeLength,
                             mazeHeight,
                             mazeLength);
-    // if (x < (originalMazeLength - (*mazeLength)) / 2 || x >= (*mazeLength) || y < (originalMazeHeight - (*mazeHeight)) / 2 || y >= (*mazeHeight))
-    //{
-    //     return true;
-    // }
-    //
-    // return false;
 }
 
 int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)

@@ -9,15 +9,16 @@ const int TIME_FOR_ENEMY_UPDATE = 50; // millisecs
 
 class Timer
 {
-private:
-    std::chrono::steady_clock::time_point lastTime;
-
 public:
-    Timer();
+    Timer(int timeToWait);
     bool hasElapsed();
     bool mightSaveHisAss();
     bool enemyUpdate();
     void reset();
+
+private:
+    std::chrono::steady_clock::time_point lastTime;
+    int timeToWait;
 };
 
 #endif
