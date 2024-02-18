@@ -23,6 +23,16 @@ class Navigation {
          */
         void spin();
 
+        /**
+         * @brief Orient le robot à l'angle désiré
+         * à appeler périodiquement pour corriger les consignes moteur.
+         * une fois l'angle atteint, les moteurs sont désactivés 
+         * @param angleRad 
+         * @return true angle atteint
+         * @return false angle pas atteint
+         */
+        bool face(float angleRad);
+
     private:
         /**
          * @brief référence au robot

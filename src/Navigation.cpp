@@ -11,9 +11,11 @@ Navigation::Navigation(Gladiator *gladiator) : gladiator(gladiator)
 inline float Navigation::rotationOffsetFromAngleError(float angleOffset)
 {
     // Seuil en dessous duquel on considère qu'on a pas besoin de corriger l'angle
-    constexpr float ANGLE_REACHED_THRESHOLD = 2. * (M_PI / 180.f); // 2° de tolérance
+    constexpr float ANGLE_REACHED_THRESHOLD = 3. * (M_PI / 180.f); // 2° de tolérance
+    constexpr float ANGLE_ALMOST_REACHED_THRESHOLD = 10. * (M_PI / 180.f); // 8° de tolérance
     // Valeur d'angle en dessous de la quelle on applique une correction proportionnelle à la cible
-    constexpr float MAX_ROTATION_SPEED = 0.20;
+    constexpr float MAX_ROTATION_SPEED = 0.2;
+    constexpr float MEDIUM_ROTATION_SPEED = 0.05;
     float absAngleOffset = std::abs(angleOffset);
     // Si on a pas besoin de corriger l'angle
     if (absAngleOffset < ANGLE_REACHED_THRESHOLD)
@@ -21,8 +23,10 @@ inline float Navigation::rotationOffsetFromAngleError(float angleOffset)
         return 0.;
         // Si on approche de la valeur à atteindre : on calcule une valeur de correction qui diminue lorsqu'on approche de la consigne
     }
-    else
+    else if (absAngleOffset < ANGLE_ALMOST_REACHED_THRESHOLD)
     {
+        absAngleOffset = MEDIUM_ROTATION_SPEED;
+    } else {
         absAngleOffset = MAX_ROTATION_SPEED;
     }
 
@@ -41,7 +45,7 @@ inline float Navigation::speedValueFromDistance(float distanceFromStart, float d
     // Distance de décélération/d'accélération
     constexpr float slopDistance = 0.2;
     // Vitesse maximale absolue
-    constexpr float maxSpeed = 0.4;
+    constexpr float maxSpeed = 0.5;
     // La plus petite vitesse qu'on doit envoyer aux moteurs pour que le robot se mette à bouger
     constexpr float minSpeed = 0.15;
     // Si la distance qu'on a à parcourir est inférieure à notre rampe d'accélération / décélération : on va à vitesse minimum
@@ -110,6 +114,17 @@ NAVIGATION_TARGET_STATE Navigation::driveTo(const Vector2 &target, bool showLogs
     // On calcule la vitesse max qu'on peut appliquer en fonction de la distance du point d'arrivée
     float speedValue = speedValueFromDistance(distanceFromStart, distanceFromTarget);
 
+    // Si on doit se retourner pour aller ver sun point, ben on y va en marche arrière, c'ets plus simple
+    if (angleError > (M_PI / 2.)) {
+        angleError -= M_PI;
+        speedValue = -speedValue;
+    }
+
+    if (angleError < (-M_PI / 2.)) {
+        angleError += M_PI;
+        speedValue = -speedValue;
+    }
+
     // On calcule la rotation qu'on doit appliquer en fonction de l'angle qu'on a par rapport à l'arrivée
     float rotationOffset = rotationOffsetFromAngleError(angleError);
 
@@ -147,4 +162,23 @@ void Navigation::spin()
 {
     gladiator->control->setWheelSpeed(WheelAxis::LEFT, -0.5);
     gladiator->control->setWheelSpeed(WheelAxis::RIGHT, 0.5);
+}
+
+bool Navigation::face(float angle) {
+    // Position actuelle du robot
+    Position posRaw = gladiator->robot->getData().position;
+    // Erreur par rapport à l'angle demandé
+    float angleError = moduloPi(angle - posRaw.a);
+    
+    // On calcule la rotation qu'on doit appliquer en fonction de l'angle qu'on a par rapport à l'arrivée
+    float rotationOffset = rotationOffsetFromAngleError(angleError);
+
+    if (abs(rotationOffset) < 0.01) {
+        gladiator->control->setWheelSpeed(WheelAxis::LEFT, 0.);
+        gladiator->control->setWheelSpeed(WheelAxis::RIGHT, 0.);
+        return true;
+    }
+    gladiator->control->setWheelSpeed(WheelAxis::LEFT, rotationOffset);
+    gladiator->control->setWheelSpeed(WheelAxis::RIGHT, -rotationOffset);
+    return false;
 }
