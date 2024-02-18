@@ -23,14 +23,12 @@ void StateStrategy::resetBasicStrategy()
     const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
     gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
     navigationStrategy->computeRandomPathing(actualRobotPosition);
-
-    // state = STATE::BASIC; ?? @todo
 }
 
 void StateStrategy::next(bool mazeWillShrink)
 {
     /// On fait les différents checks
-    if (mazeWillShrink && state != STATE::SAVE && shouldSaveMyAss())
+    if (mazeWillShrink && shouldSaveMyAss())
     {
         state = STATE::SAVE;
     }
@@ -39,13 +37,14 @@ void StateStrategy::next(bool mazeWillShrink)
         // gladiator->log("defend");
         state = STATE::DEFEND;
     }
-    else if (state != STATE::BASIC)
-    {
-        state = STATE::BASIC;
-    }
     else if (shouldLaunchRocket(actualPositionToFind))
     {
         state = STATE::ROCKET;
+    }
+    else if (state != STATE::BASIC)
+    {
+        resetBasicStrategy();
+        state = STATE::BASIC;
     }
 
     /// On fait l'action en fonction de l'état
@@ -78,10 +77,10 @@ void StateStrategy::useBasicStrategy()
         gladiator->log("Target %d:%d reached", actualPositionToFind.getX(), actualPositionToFind.getY());
 
         /// On regarde la prochaine position à aller voir
-        if (navigationStack->hasNext()) {
-            actualPositionToFind = navigationStack->shift();
-        }
-        navigationStrategy->computeRandomPathing(actualPositionToFind);
+        actualPositionToFind = navigationStack->shift();
+        MyPosition *positionOnTop = navigationStack->getPositionOnTop();
+        gladiator->log("Nouvelle target %d:%d", positionOnTop->getX(), positionOnTop->getY());
+        navigationStrategy->computeRandomPathing(*positionOnTop);
     }
 };
 
@@ -141,15 +140,18 @@ void StateStrategy::useRocketStrategy()
 
 bool StateStrategy::shouldLaunchRocket(MyPosition nextPosition)
 {
-    /// Si on a déjà une roquette et qu'on va en récupérer une => On launch
-    if (gladiator->maze->getSquare(nextPosition.getX(), nextPosition.getY())->coin.value > 0 && gladiator->weapon->canLaunchRocket())
+    if (gladiator->weapon->canLaunchRocket())
     {
-        return true;
-    }
-    /// Si on est près d'un ennemie (simple ?) on launch
-    if (robotsData->isEnemyClose(gladiator->maze->getSquareSize() * 5))
-    {
-        return true;
+        /// Si on a déjà une roquette et qu'on va en récupérer une => On launch
+        if (gladiator->maze->getSquare(nextPosition.getX(), nextPosition.getY())->coin.value > 0)
+        {
+            return true;
+        }
+        /// Si on est près d'un ennemie (simple ?) on launch
+        if (robotsData->isEnemyClose(gladiator->maze->getSquareSize() * 5))
+        {
+            return true;
+        }
     }
 
     return false;

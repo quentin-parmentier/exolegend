@@ -130,7 +130,7 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
     const int caseNeutre = 30;
     const int caseAdverse = 50;
 
-    const int caseRoquette = 0;
+    const int caseRoquette = 20;
     const int caseBorder = 40;
 
     const int caseDanger = -20;
