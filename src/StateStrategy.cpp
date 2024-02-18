@@ -32,14 +32,14 @@ void StateStrategy::next(bool mazeWillShrink)
     {
         state = STATE::SAVE;
     }
+    else if (shouldLaunchRocket(actualPositionToFind))
+    {
+        state = STATE::ROCKET;
+    }
     else if (robotsData->isEnemyClose(0.4))
     {
         // gladiator->log("defend");
         state = STATE::DEFEND;
-    }
-    else if (shouldLaunchRocket(actualPositionToFind))
-    {
-        state = STATE::ROCKET;
     }
     else if (state != STATE::BASIC)
     {
