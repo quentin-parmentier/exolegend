@@ -23,13 +23,20 @@ void StateStrategy::resetBasicStrategy()
     const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
     gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
     navigationStrategy->computeRandomPathing(actualRobotPosition);
+    state = STATE::BASIC;
 }
 
 void StateStrategy::next(bool mazeWillShrink)
 {
     /// On fait les différents checks
-    if (mazeWillShrink && shouldSaveMyAss())
+    if (mazeWillShrink && state != STATE::SAVE)
     {
+        gladiator->log("On doit se sauver");
+        state = STATE::SAVE;
+    }
+    else if (state == STATE::SAVE)
+    {
+        gladiator->log("On doit se sauver");
         state = STATE::SAVE;
     }
     else if (shouldLaunchRocket(actualPositionToFind))
@@ -38,14 +45,24 @@ void StateStrategy::next(bool mazeWillShrink)
     }
     else if (robotsData->isEnemyClose(0.4))
     {
-        // gladiator->log("defend");
         state = STATE::DEFEND;
     }
     else if (state != STATE::BASIC)
     {
-        resetBasicStrategy();
         state = STATE::BASIC;
+        resetBasicStrategy();
     }
+    // else if (robotsData->isEnemyClose(0.4))
+    //{
+    //     // gladiator->log("defend");
+    //     state = STATE::DEFEND;
+    // }
+    // else if (state != STATE::BASIC)
+    //{
+    //    gladiator->log("On est sauvé");
+    //    resetBasicStrategy();
+    //    state = STATE::BASIC;
+    //}
 
     /// On fait l'action en fonction de l'état
     if (state == STATE::BASIC)
@@ -77,7 +94,8 @@ void StateStrategy::useBasicStrategy()
         gladiator->log("Target %d:%d reached", actualPositionToFind.getX(), actualPositionToFind.getY());
 
         /// On regarde la prochaine position à aller voir
-        if (navigationStack->hasNext()) {
+        if (navigationStack->hasNext())
+        {
             actualPositionToFind = navigationStack->shift();
         }
         navigationStrategy->computeRandomPathing(actualPositionToFind);
@@ -91,31 +109,13 @@ void StateStrategy::useSpinStrategy()
 
 void StateStrategy::useSaveStrategy()
 {
-    /// On vient d'arriver dans l'état SAVE
-    if (!hasToGoToSavePosition)
+    /// On fonce vers le milieu tant que notre position n'est pas safe
+    float milieu = gladiator->maze->getSquareSize() * 6;
+    navigation->driveTo(Vector2(milieu, milieu));
+
+    /// Reshrink donc c'est cool
+    if (!shouldSaveMyAss())
     {
-        hasToGoToSavePosition = true;
-        /// On trouve la case la plus proche
-        const MazeSquare *msq = gladiator->maze->getNearestSquare();
-
-        int nextMazeHeight = (*mazeHeight - 2);
-        int nextMazeLength = (*mazeLength - 2);
-        savePosition = getNearestValidPosition(msq->i, msq->j, originalMazeHeight, originalMazeLength, nextMazeHeight, nextMazeLength);
-
-        gladiator->log("On est en : %d:%d", msq->i, msq->j);
-        gladiator->log("La position de repli c'est : %d:%d", savePosition.getX(), savePosition.getY());
-    }
-
-    /// On y va à pleine balle tout droit
-    NAVIGATION_TARGET_STATE navigationState = navigation->driveTo(savePosition.toVector(gladiator->maze->getSquareSize()));
-    /// Est-ce qu'on est arrivé à la position ? On reset
-    if (navigationState == NAVIGATION_TARGET_STATE::REACHED)
-    {
-        const MazeSquare *msq = gladiator->maze->getNearestSquare();
-        gladiator->log("On est safe en : %d:%d", msq->i, msq->j);
-        gladiator->log("La position safe c'est : %d:%d", savePosition.getX(), savePosition.getY());
-
-        hasToGoToSavePosition = false;
         state = STATE::BASIC;
         resetBasicStrategy();
     }
@@ -125,7 +125,6 @@ void StateStrategy::useRocketStrategy()
 {
     RobotData closestEnnemy = robotsData->getClosestEnnemy();
 
-    gladiator->log("ENNEMY LE PLUS PROCHE : %f:%f", closestEnnemy.position.x, closestEnnemy.position.y);
     /// On récupère l'angle
     float angleRadian = calculerAngle(gladiator->robot->getData().position, closestEnnemy.position);
     /// Se tourne vers la cible

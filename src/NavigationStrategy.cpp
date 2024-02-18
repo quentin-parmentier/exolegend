@@ -17,7 +17,7 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
 
     gladiator->log("On relance une recherche");
 
-    const int numberOfTry = 100;
+    const int numberOfTry = 50;
     int maxScore = 0;
     /// On va ignorer la premiere direction parce que c'est compliqué de savoir dans x pas à combien on sera @todo
     Direction lastDirection = Direction::RIGHT;
@@ -34,6 +34,8 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
 
         MyPosition actualPosition = fromPosition;
 
+        gladiator->log("actualPosition est %d:%d", actualPosition.getX(), actualPosition.getY());
+
         /// On tente d'avoir un parcours cool
         for (int j = 0; j < depthWalking; j++)
         {
@@ -49,9 +51,14 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
             /// On ne veut pas aller en dehors de la Map => On passe
             if (isOutside(x, y))
             {
+                // gladiator->log("%d:%d est OUT", x, y);
                 /// On fait en sorte de tjr avoir la bonne taille de MyPosition
                 j--;
                 continue;
+            }
+            else
+            {
+                // gladiator->log("%d:%d est DEDANS", x, y);
             }
 
             const int actualX = actualPosition.getX();
@@ -114,12 +121,6 @@ bool NavigationStrategy::isOutside(int x, int y)
                             originalMazeLength,
                             mazeHeight,
                             mazeLength);
-    // if (x < (originalMazeLength - (*mazeLength)) / 2 || x >= (*mazeLength) || y < (originalMazeHeight - (*mazeHeight)) / 2 || y >= (*mazeHeight))
-    //{
-    //     return true;
-    // }
-    //
-    // return false;
 }
 
 int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
@@ -127,8 +128,8 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
     int score = 0;
 
     const int caseEquipe = 0;
-    const int caseNeutre = 30;
-    const int caseAdverse = 60;
+    const int caseNeutre = 10;
+    const int caseAdverse = 20;
 
     const int caseRoquette = 40;
     const int caseBorder = 40;

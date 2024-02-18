@@ -40,6 +40,7 @@ MyPosition getNearestValidPosition(int robotX, int robotY, int originalMazeHeigh
         }
     }
 
+    std::cout << "La position la plus proche safe - " << nearestPosition.getX() << ":" << nearestPosition.getY();
     return nearestPosition;
 }
 
