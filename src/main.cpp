@@ -64,8 +64,7 @@ void reset()
 
     gladiator->log("ROBOT BASE %d:%d", ROBOT_POSITION.getX(), ROBOT_POSITION.getY());
 
-    navigationStrategy->computeRandomPathing(ROBOT_POSITION); // @todo Premiere itération ROBOT_POSITION puis derniere case dans robotPositionArray
-    stateStrategy->actualPositionToFind = navigationStack->shift();
+    stateStrategy->resetBasicStrategy();    
 }
 
 void setup()

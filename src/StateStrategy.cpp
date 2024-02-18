@@ -23,8 +23,10 @@ void StateStrategy::resetBasicStrategy()
     const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
     gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
     navigationStrategy->computeRandomPathing(actualRobotPosition);
+    actualPositionToFind = navigationStack->shift();
     navigationStack->printTab();
     state = STATE::BASIC;
+
 }
 
 void StateStrategy::next(bool mazeWillShrink)
