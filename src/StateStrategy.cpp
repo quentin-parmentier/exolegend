@@ -43,12 +43,17 @@ void StateStrategy::next(bool mazeWillShrink)
     {
         state = STATE::ROCKET;
     }
+    // else if (robotsData->isAllyClose(0.4))
+    //{
+    //     state = STATE::ESQUIVE;
+    // }
     else if (robotsData->isEnemyClose(0.4))
     {
         state = STATE::DEFEND;
     }
     else if (state != STATE::BASIC)
     {
+        gladiator->log("On revient à basic");
         state = STATE::BASIC;
         resetBasicStrategy();
     }
@@ -81,6 +86,10 @@ void StateStrategy::next(bool mazeWillShrink)
     {
         useRocketStrategy();
     }
+    else if (state == STATE::ESQUIVE)
+    {
+        useEsquiveStrategy();
+    }
 }
 
 void StateStrategy::useBasicStrategy()
@@ -105,6 +114,22 @@ void StateStrategy::useBasicStrategy()
 void StateStrategy::useSpinStrategy()
 {
     navigation->spin();
+}
+
+void StateStrategy::useEsquiveStrategy()
+{
+    float monX = gladiator->robot->getData().position.x;
+    float allyX = robotsData->getClosestAlly().position.x;
+
+    float milieu = gladiator->maze->getSquareSize() * 6;
+    if (monX > allyX)
+    {
+        navigation->driveTo(Vector2(milieu + gladiator->maze->getSquareSize(), milieu));
+    }
+    else
+    {
+        navigation->driveTo(Vector2(milieu - gladiator->maze->getSquareSize(), milieu));
+    }
 }
 
 void StateStrategy::useSaveStrategy()

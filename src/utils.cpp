@@ -87,7 +87,7 @@ RobotData getClosestRobotData(RobotData robotData1, RobotData robotData2, Positi
     float drp1 = distanceFromPosition(rp1, myPosition);
     float drp2 = distanceFromPosition(rp2, myPosition);
 
-    if (drp1 < drp2)
+    if (drp1 < drp2 && robotData1.lifes > 0)
     {
         return robotData1;
     }

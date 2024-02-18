@@ -93,6 +93,8 @@ void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
         navigationStack->push(positions[i]);
     }
 
+    // navigationStack->printTab();
+
     // navigationStack->simplify();
 }
 

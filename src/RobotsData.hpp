@@ -25,7 +25,9 @@ public:
      *
      */
     bool isEnemyClose(float range);
+    bool isAllyClose(float range);
     RobotData getClosestEnnemy();
+    RobotData getClosestAlly();
     void init();
     byte coop[2];
     byte comp[2];

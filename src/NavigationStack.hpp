@@ -58,11 +58,12 @@ public:
      */
     MyPosition *getPositionOnTop();
 
-
     /**
-     * @brief Permet de reduire la liste pour aller plus vite sur les lignes droites 
+     * @brief Permet de reduire la liste pour aller plus vite sur les lignes droites
      */
     void simplify();
+
+    void printTab();
 
 private:
     MyPosition **positions;

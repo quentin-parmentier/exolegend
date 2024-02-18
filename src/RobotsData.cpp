@@ -79,6 +79,30 @@ bool RobotsData::isEnemyClose(float range)
     }
 }
 
+bool RobotsData::isAllyClose(float range)
+{
+    RobotData myData = gladiator->robot->getData();
+    RobotData allyData = coop[0] == myData.id ? gladiator->game->getOtherRobotData(coop[1]) : gladiator->game->getOtherRobotData(coop[0]);
+
+    if (distanceFromPosition(allyData.position, myData.position) < range)
+    {
+        gladiator->log("enemy %d in range", allyData.id);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+RobotData RobotsData::getClosestAlly()
+{
+    RobotData myData = gladiator->robot->getData();
+    RobotData allyData = coop[0] == myData.id ? gladiator->game->getOtherRobotData(coop[1]) : gladiator->game->getOtherRobotData(coop[0]);
+
+    return allyData;
+}
+
 RobotData RobotsData::getClosestEnnemy()
 {
     RobotData ennemy1 = gladiator->game->getOtherRobotData(comp[0]);

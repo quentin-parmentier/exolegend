@@ -85,3 +85,11 @@ MyPosition *NavigationStack::getPositionOnTop()
     // std::cout << "TOP POSITION :" << positions[currentIndex]->getX() << ":" << positions[currentIndex]->getY() << "\n";
     return positions[currentIndex];
 }
+
+void NavigationStack::printTab()
+{
+    for (int i = 0; i < currentIndex; i++)
+    {
+        std::cout << " CASE - " << i << " VALEUR : " << positions[i]->getX() << ":" << positions[i]->getY() << "\n";
+    }
+}

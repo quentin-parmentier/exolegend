@@ -11,7 +11,8 @@ enum STATE
     BASIC,
     SAVE,
     ROCKET,
-    DEFEND
+    DEFEND,
+    ESQUIVE
 };
 
 class StateStrategy
@@ -23,6 +24,7 @@ public:
     void useSaveStrategy();
     void useRocketStrategy();
     void useSpinStrategy();
+    void useEsquiveStrategy();
     void next(bool mazeWillShrink);
     void resetBasicStrategy();
     MyPosition actualPositionToFind;
