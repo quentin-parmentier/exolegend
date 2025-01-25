@@ -28,32 +28,31 @@ RobotsData::RobotsData(Gladiator *gladiator) : gladiator(gladiator)
 
 void RobotsData::init()
 {
+    ally1 = gladiator->robot->getData().id;
 
-    coop[0] = gladiator->robot->getData().id;
-
+    int advers = 0;
+    ennemy1 = 0;
+    ennemy2 = 0;
+    
     // gladiator->log("Robot id=%d", me.id);
     for (uint8_t id : gladiator->game->getPlayingRobotsId().ids)
     {
-        int advers = 0;
-        comp[0] = 0;
-        comp[1] = 0;
-        coop[0] = 0;
-        RobotData ret{};
-        if (id != coop[0])
+        RobotData robotData{};
+        if (id != ally1)
         {
             // on prend celui dont l'id est différent du robot actuel
-            ret = gladiator->game->getOtherRobotData(id); // 4.3.3
-            if (ret.teamId != gladiator->robot->getData().teamId)
+            robotData = gladiator->game->getOtherRobotData(id); // 4.3.3
+            if (robotData.teamId != gladiator->robot->getData().teamId)
             {
                 if (advers == 0)
-                    comp[0] = ret.id;
+                    ennemy1 = robotData.id;
                 else
-                    comp[1] = ret.id;
+                    ennemy2 = robotData.id;
                 advers++;
             }
             else
             {
-                coop[1] = ret.id;
+                ally2 = robotData.id;
             }
         }
     }
@@ -62,15 +61,15 @@ void RobotsData::init()
 bool RobotsData::isEnemyClose(float range)
 {
     /// enemy 1
-    if (comp[0] != 0 && gladiator->game->getOtherRobotData(comp[0]).lifes > 0 && sqrt(sq(gladiator->game->getOtherRobotData(comp[0]).position.x - gladiator->robot->getData().position.x) + sq(gladiator->game->getOtherRobotData(comp[0]).position.y - gladiator->robot->getData().position.y)) < range)
+    if (ennemy1 != 0 && gladiator->game->getOtherRobotData(ennemy1).lifes > 0 && sqrt(sq(gladiator->game->getOtherRobotData(ennemy1).position.x - gladiator->robot->getData().position.x) + sq(gladiator->game->getOtherRobotData(ennemy1).position.y - gladiator->robot->getData().position.y)) < range)
     {
-        gladiator->log("enemy %d in range", comp[0]);
+        gladiator->log("enemy %d in range", ennemy1);
         return true;
         // }else if(comp2ID !=8 && comp2.lifes > 0 && distance(MyPosition(comp1.position.x, comp1.position.y), MyPosition(me.position.x, me.position.y) ) < range){
     }
-    else if (comp[1] != 0 && gladiator->game->getOtherRobotData(comp[1]).lifes > 0 && sqrt(sq(gladiator->game->getOtherRobotData(comp[1]).position.x - gladiator->robot->getData().position.x) + sq(gladiator->game->getOtherRobotData(comp[1]).position.y - gladiator->robot->getData().position.y)) < range)
+    else if (ennemy2 != 0 && gladiator->game->getOtherRobotData(ennemy2).lifes > 0 && sqrt(sq(gladiator->game->getOtherRobotData(ennemy2).position.x - gladiator->robot->getData().position.x) + sq(gladiator->game->getOtherRobotData(ennemy2).position.y - gladiator->robot->getData().position.y)) < range)
     {
-        gladiator->log("enemy %d in range", comp[1]);
+        gladiator->log("enemy %d in range", ennemy2);
         return true;
     }
     else
@@ -82,7 +81,7 @@ bool RobotsData::isEnemyClose(float range)
 bool RobotsData::isAllyClose(float range)
 {
     RobotData myData = gladiator->robot->getData();
-    RobotData allyData = coop[0] == myData.id ? gladiator->game->getOtherRobotData(coop[1]) : gladiator->game->getOtherRobotData(coop[0]);
+    RobotData allyData = ally1 == myData.id ? gladiator->game->getOtherRobotData(ally2) : gladiator->game->getOtherRobotData(ally1);
 
     if (distanceFromPosition(allyData.position, myData.position) < range)
     {
@@ -98,14 +97,15 @@ bool RobotsData::isAllyClose(float range)
 RobotData RobotsData::getClosestAlly()
 {
     RobotData myData = gladiator->robot->getData();
-    RobotData allyData = coop[0] == myData.id ? gladiator->game->getOtherRobotData(coop[1]) : gladiator->game->getOtherRobotData(coop[0]);
+    RobotData allyData = ally1 == myData.id ? gladiator->game->getOtherRobotData(ally2) : gladiator->game->getOtherRobotData(ally1);
 
     return allyData;
 }
 
 RobotData RobotsData::getClosestEnnemy()
 {
-    RobotData ennemy1 = gladiator->game->getOtherRobotData(comp[0]);
-    RobotData ennemy2 = gladiator->game->getOtherRobotData(comp[1]);
-    return getClosestRobotData(ennemy1, ennemy2, gladiator->robot->getData().position);
+    RobotData ennemyRobotData1 = gladiator->game->getOtherRobotData(ennemy1);
+    RobotData ennemyRobotData2 = gladiator->game->getOtherRobotData(ennemy2);
+
+    return getClosestRobotData(ennemyRobotData1, ennemyRobotData2, gladiator->robot->getData().position);
 }

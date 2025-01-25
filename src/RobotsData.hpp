@@ -29,8 +29,10 @@ public:
     RobotData getClosestEnnemy();
     RobotData getClosestAlly();
     void init();
-    byte coop[2];
-    byte comp[2];
+    byte ally1;
+    byte ally2;
+    uint8_t ennemy1;
+    byte ennemy2;
 
 private:
     Gladiator *gladiator;
