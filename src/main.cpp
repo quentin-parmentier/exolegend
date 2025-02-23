@@ -20,7 +20,7 @@ const int MAZE_LENGTH = 12; // x
 int ACTUAL_MAZE_HEIGHT = MAZE_HEIGHT;
 int ACTUAL_MAZE_LENGTH = MAZE_LENGTH;
 const MazeSquare ***maze;
-const int DEPTH_WALKING = 12;
+const int DEPTH_WALKING = 10;
 
 bool isFirst = true;
 
@@ -32,7 +32,7 @@ RobotsData *robotsData;
 MyPosition ROBOT_POSITION = MyPosition(0, 0);
 
 /// Position que l'on veut que notre robot parcours (On veut recalculer la nouvelle chaine quand il nous reste 2 positions dans la tab)
-const int MAXIMAL_POSITION_ARRAY_LENGTH = DEPTH_WALKING + 2;
+const int MAXIMAL_POSITION_ARRAY_LENGTH = DEPTH_WALKING;
 MyPosition *robotPositionArray[MAXIMAL_POSITION_ARRAY_LENGTH];
 NavigationStack *navigationStack;
 NavigationStrategy *navigationStrategy;

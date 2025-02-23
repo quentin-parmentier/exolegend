@@ -6,96 +6,51 @@ NavigationStrategy::NavigationStrategy(NavigationStack *navigationStack, Gladiat
 {
 }
 
-void NavigationStrategy::computeRandomPathing(MyPosition fromPosition)
-{
-    // Si on a encore assez de chemin faire on calcule pas de nouveau chemin
-    if (navigationStack->hasNext())
-    {
-        gladiator->log("On a pas encore tout depile");
+void NavigationStrategy::computeBestPath(
+    MyPosition actualPos, 
+    std::vector<MyPosition>& currentPath, 
+    std::vector<MyPosition>& bestPath, 
+    int currentScore, 
+    int& maxScore, 
+    std::set<MyPosition>& visited
+) {
+    if (navigationStack->hasNext()) {
         return;
     }
 
-    gladiator->log("On relance une recherche");
+    int depthRemaining = depthWalking - currentPath.size();
 
-    const int numberOfTry = 65;
-    int maxScore = 0;
-    /// On va ignorer la premiere direction parce que c'est compliqué de savoir dans x pas à combien on sera @todo
-    Direction lastDirection = Direction::RIGHT;
-
-    /// On devrait peut être regarder fromPosition +
-
-    /// La suite de position gagnante
-    MyPosition positions[depthWalking];
-
-    for (int i = 0; i < numberOfTry; i++)
-    {
-        int scoreOfTry = 0;
-        MyPosition positionOfTry[depthWalking];
-
-        MyPosition actualPosition = fromPosition;
-
-        gladiator->log("actualPosition est %d:%d", actualPosition.getX(), actualPosition.getY());
-
-        /// On tente d'avoir un parcours cool
-        for (int j = 0; j < depthWalking; j++)
-        {
-            /// On récupère une position random pour calculer sa valeur
-            const Direction nextDirection = getRandomDirection(lastDirection, j != 0);
-
-            /// On ne peut pas forcément annuler le fait d'aller dans un mur parce que parfois ça sera la meilleure chose à faire
-            /// Regarder si on est bloqué pour traverser un mur parce que la meilleure solution peut être de ne rien faire !
-            const MyPosition nextPosition = getNextCase(nextDirection, actualPosition);
-            const int x = nextPosition.getX();
-            const int y = nextPosition.getY();
-
-            /// On ne veut pas aller en dehors de la Map => On passe
-            if (isOutside(x, y))
-            {
-                // gladiator->log("%d:%d est OUT", x, y);
-                /// On fait en sorte de tjr avoir la bonne taille de MyPosition
-                j--;
-                continue;
-            }
-            else
-            {
-                // gladiator->log("%d:%d est DEDANS", x, y);
-            }
-
-            const int actualX = actualPosition.getX();
-            const int actualY = actualPosition.getY();
-
-            /// On récupère la valeur du prochain MazeSquare
-            const MazeSquare *nextMazeSquare = maze[x][y];
-            const MazeSquare *actualMazeSquare = maze[actualX][actualY];
-
-            const bool isGoingThroughWall = goingThroughWall(nextDirection, actualMazeSquare);
-            const int valueOfNextMazeSquare = valueOfMS(nextMazeSquare, isGoingThroughWall);
-
-            /// On update
-            actualPosition = nextPosition;
-            lastDirection = nextDirection;
-            scoreOfTry += valueOfNextMazeSquare;
-            positionOfTry[j] = nextPosition;
+    if (depthRemaining == 0 || isOutside(actualPos.getX(), actualPos.getY())) {
+        if (currentScore > maxScore) {
+            maxScore = currentScore;
+            bestPath = currentPath; // Mise à jour du meilleur chemin
         }
-
-        if (maxScore < scoreOfTry)
-        {
-            maxScore = scoreOfTry;
-            for (int i = 0; i < depthWalking; i++)
-            {
-                positions[i] = positionOfTry[i];
-            }
-        }
+        return;
     }
 
-    for (int i = 0; i < depthWalking; i++)
-    {
-        navigationStack->push(positions[i]);
+    currentPath.push_back(actualPos);
+    visited.insert(actualPos);
+
+    for (Direction dir : {LEFT, RIGHT, TOP, BOTTOM}) {
+        MyPosition nextPos = getNextCase(dir, actualPos);
+
+        if (isOutside(nextPos.getX(), nextPos.getY())) continue;
+
+        const bool isGoingThroughWall = goingThroughWall(dir, maze[actualPos.getX()][actualPos.getY()]);
+        int nextValue = valueOfMS(maze[nextPos.getX()][nextPos.getY()], isGoingThroughWall, visited);
+
+        computeBestPath(nextPos, currentPath, bestPath, currentScore + nextValue, maxScore, visited);
     }
 
-    // navigationStack->printTab();
+    visited.erase(actualPos);
+    currentPath.pop_back();
 
-    // navigationStack->simplify();
+    if (currentPath.empty()) { // Ça signifie qu'on est revenu à la racine (premier appel)
+        navigationStack->reset();
+        for (const auto& pos : bestPath) {
+            navigationStack->push(pos);
+        }
+    }
 }
 
 // Pour tester le robot, ne pas oublier de commenter pour les matchs !!!
@@ -125,31 +80,36 @@ bool NavigationStrategy::isOutside(int x, int y)
                             mazeLength);
 }
 
-int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall)
+int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall, std::set<MyPosition>& visited)
 {
     int score = 0;
 
-    const int caseEquipe = -20;
-    const int caseNeutre = 10;
-    const int caseAdverse = 20;
+    const int caseEquipe = -500;
+    const int caseNeutre = 100;
+    const int caseAdverse = 200;
 
-    const int caseRoquette = 50;
-    const int caseBorder = 40;
+    const int caseRoquette = 100;
+    const int caseBorder = 200;
 
     const int caseDanger = -20;
-    const int caseGoingThrougWall = -300;
+    const int caseGoingThrougWall = -1000;
 
-    const int caseOustide = -10000;
+    const int caseOustide = -1000000;
 
     if (ms == nullptr)
     {
         return caseOustide;
     }
 
+    bool found = std::find_if(visited.begin(), visited.end(), [ms](const MyPosition& p) {
+        return p.getX() == ms->i && p.getY() == ms->j;
+    }) != visited.end();
+
     /// Si la case est à nous --
-    if (ms->possession == gladiator->robot->getData().teamId)
+    if (ms->possession == gladiator->robot->getData().teamId || found)
     {
-        return caseEquipe;
+        gladiator->log("Case déjà à nous");
+        score += caseEquipe;
     }
 
     /// Si la case a une roquette ++

@@ -22,7 +22,11 @@ void StateStrategy::resetBasicStrategy()
     const MazeSquare *initialMazeSquare = gladiator->maze->getNearestSquare();
     const MyPosition actualRobotPosition = MyPosition(initialMazeSquare->i, initialMazeSquare->j);
     gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
-    navigationStrategy->computeRandomPathing(actualRobotPosition);
+    int maxScore = -99999;
+    std::vector<MyPosition> currentPath, bestPath;
+    std::set<MyPosition> visited;
+
+    navigationStrategy->computeBestPath(actualRobotPosition, currentPath, bestPath, 0, maxScore, visited);
     actualPositionToFind = navigationStack->shift();
     navigationStack->printTab();
     state = STATE::BASIC;
@@ -110,7 +114,11 @@ void StateStrategy::useBasicStrategy()
         {
             actualPositionToFind = navigationStack->shift();
         }
-        navigationStrategy->computeRandomPathing(actualPositionToFind);
+        
+        int maxScore = -99999;
+        std::vector<MyPosition> currentPath, bestPath;
+        std::set<MyPosition> visited;
+        navigationStrategy->computeBestPath(actualPositionToFind, currentPath, bestPath, 0, maxScore, visited);
     }
 };
 

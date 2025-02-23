@@ -4,6 +4,9 @@
 #include "NavigationStack.hpp"
 #include "MyPosition.hpp"
 #include "gladiator.h"
+#include <vector>
+#include <set>
+#include <algorithm>
 
 enum Direction
 {
@@ -18,10 +21,10 @@ class NavigationStrategy
 
 public:
     NavigationStrategy(NavigationStack *navigationStack, Gladiator *gladiator, int depthWalking, const MazeSquare ***maze, int *mazeHeight, int *mazeLength, int originalMazeHeight, int originalMazeLength);
-    void computeRandomPathing(MyPosition fromPosition);
+    void computeBestPath(MyPosition actualPos, std::vector<MyPosition>& currentPath, std::vector<MyPosition>& bestPath, int currentScore, int& maxScore, std::set<MyPosition>& visited);    
     bool isOnMazeBorder(int x, int y);
     bool isOutside(int x, int y);
-    int valueOfMS(const MazeSquare *ms, const bool throughWall);
+    int valueOfMS(const MazeSquare *ms, const bool throughWall, std::set<MyPosition>& visited);
     int costOfMS(MazeSquare ms);
     Direction getReverseDirection(Direction direction);
     Direction getRandomDirection(Direction lastDirection, bool tryToGoForward);

@@ -13,6 +13,14 @@ public:
     int getY() const;
     void copy(MyPosition p);
 
+    bool operator<(const MyPosition& other) const {
+        // Comparaison par x, puis y si les x sont égaux
+        if (_x != other._x) {
+            return _x < other._x;
+        }
+        return _y < other._y;
+    }
+
 private:
     int _x, _y;
 };
