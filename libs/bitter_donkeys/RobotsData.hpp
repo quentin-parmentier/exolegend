@@ -13,26 +13,46 @@ class RobotsData
 {
 public:
     /**
+     * @brief Construct a new RobotsData object without data (for unit test)
+     *
+     * @param
+     */
+    RobotsData();
+
+    /**
      * @brief Construct a new RobotsData  object
      *
-     * @param robotList
-     * @param teamId
+     * @param gladiator
      */
     RobotsData(Gladiator *gladiator);
 
     /**
      * @brief Update Data about the different actors
-     *
+     * @param range Rayon détection en metre
      */
     bool isEnemyClose(float range);
+    /**
+     * @brief Update Data about the different actors
+     * @param range Rayon détection en metre
+     */
+    bool isEnemyClose(float range, RobotData currentRobot, RobotData enemy1, RobotData enemy2);
+    /**
+     * @brief Update Data about the different actors
+     * @param range Rayon détection en metre
+     */
     bool isAllyClose(float range);
-    RobotData getClosestEnnemy();
+    /**
+     * @brief Update Data about the different actors
+     * @param range Rayon détection en metre
+     */
+    bool isAllyClose(float range, RobotData currentRobot, RobotData ally);
+    RobotData getClosestEnemy();
     RobotData getClosestAlly();
     void init();
-    byte ally1;
-    byte ally2;
-    uint8_t ennemy1;
-    byte ennemy2;
+    byte currentRobotID;
+    byte teammateRobotID;
+    byte enemy1ID;
+    byte enemy2ID;
 
 private:
     Gladiator *gladiator;

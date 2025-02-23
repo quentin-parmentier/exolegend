@@ -151,7 +151,7 @@ void StateStrategy::useSaveStrategy(bool mazeWillShrink)
 
 void StateStrategy::useRocketStrategy()
 {
-    RobotData closestEnnemy = robotsData->getClosestEnnemy();
+    RobotData closestEnnemy = robotsData->getClosestEnemy();
 
     /// On récupère l'angle
     float angleRadian = calculerAngle(gladiator->robot->getData().position, closestEnnemy.position);
