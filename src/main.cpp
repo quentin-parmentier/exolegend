@@ -1,17 +1,17 @@
 #include "gladiator.h"
-#include "Vector2.hpp"
-#include "Navigation.hpp"
-#include "utils.hpp"
+#include <Vector2.hpp>
+#include <Navigation.hpp>
+#include <utils.hpp>
 
 // #include <random>
 #include <algorithm> // Pour std::copy
 #include <iostream>
-#include "MyPosition.hpp"
-#include "Timer.hpp"
-#include "NavigationStack.hpp"
-#include "NavigationStrategy.hpp"
-#include "StateStrategy.hpp"
-#include "RobotsData.hpp"
+#include <MyPosition.hpp>
+#include <Timer.hpp>
+#include <NavigationStack.hpp>
+#include <NavigationStrategy.hpp>
+#include <StateStrategy.hpp>
+#include <RobotsData.hpp>
 
 #undef abs
 

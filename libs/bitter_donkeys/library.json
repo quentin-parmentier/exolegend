@@ -1,0 +1,11 @@
+{
+    "name": "bitter_donkeys_fwk",
+    "version": "0.0.1",
+    "description": "bitter_donkeys_fwk",
+	"platforms": [
+        "native"
+    ],
+    "build": {},
+	"dependencies": [
+	]
+}
