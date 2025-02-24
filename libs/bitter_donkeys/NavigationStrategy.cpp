@@ -28,13 +28,14 @@ void NavigationStrategy::computeBestPath(
         return;
     }
 
+    MyPosition lastPos = (currentPath.empty()) ? MyPosition{-1, -1} : currentPath.back();
     currentPath.push_back(actualPos);
     visited.insert(actualPos);
 
     for (Direction dir : {LEFT, RIGHT, TOP, BOTTOM}) {
         MyPosition nextPos = getNextCase(dir, actualPos);
-
-        if (isOutside(nextPos.getX(), nextPos.getY())) continue;
+        
+        if (isOutside(nextPos.getX(), nextPos.getY()) || (nextPos.getX() == lastPos.getX() && nextPos.getY() == lastPos.getY())) continue;
 
         const bool isGoingThroughWall = goingThroughWall(dir, maze[actualPos.getX()][actualPos.getY()]);
         int nextValue = valueOfMS(maze[nextPos.getX()][nextPos.getY()], isGoingThroughWall, visited);
@@ -92,7 +93,7 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall, 
     const int caseBorder = 200;
 
     const int caseDanger = -20;
-    const int caseGoingThrougWall = -1000;
+    const int caseGoingThrougWall = -3000;
 
     const int caseOustide = -1000000;
 
@@ -104,13 +105,6 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall, 
     bool found = std::find_if(visited.begin(), visited.end(), [ms](const MyPosition& p) {
         return p.getX() == ms->i && p.getY() == ms->j;
     }) != visited.end();
-
-    /// Si la case est à nous --
-    if (ms->possession == gladiator->robot->getData().teamId || found)
-    {
-        gladiator->log("Case déjà à nous");
-        score += caseEquipe;
-    }
 
     /// Si la case a une roquette ++
     if ((ms->coin).value)
@@ -126,8 +120,9 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall, 
     if (ms->possession == 0)
     {
         score += caseNeutre;
+    } else if (ms->possession == gladiator->robot->getData().teamId || found) {
+        score += caseEquipe;
     }
-    /// Si la case est aux autre ++
     else
     {
         score += caseAdverse;
