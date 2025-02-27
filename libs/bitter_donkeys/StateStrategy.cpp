@@ -24,9 +24,8 @@ void StateStrategy::resetBasicStrategy()
     gladiator->log("Actual position %d:%d", actualRobotPosition.getX(), actualRobotPosition.getY());
     int maxScore = -99999;
     std::vector<MyPosition> currentPath, bestPath;
-    std::set<MyPosition> visited;
 
-    navigationStrategy->computeBestPath(actualRobotPosition, currentPath, bestPath, 0, maxScore, visited);
+    navigationStrategy->computeBestPath(actualRobotPosition, currentPath, bestPath, 0, maxScore);
     actualPositionToFind = navigationStack->shift();
     navigationStack->printTab();
     state = STATE::BASIC;
@@ -117,8 +116,7 @@ void StateStrategy::useBasicStrategy()
         
         int maxScore = -99999;
         std::vector<MyPosition> currentPath, bestPath;
-        std::set<MyPosition> visited;
-        navigationStrategy->computeBestPath(actualPositionToFind, currentPath, bestPath, 0, maxScore, visited);
+        navigationStrategy->computeBestPath(actualPositionToFind, currentPath, bestPath, 0, maxScore);
     }
 };
 

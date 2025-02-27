@@ -8,19 +8,20 @@ NavigationStrategy::NavigationStrategy(NavigationStack *navigationStack, Gladiat
 
 void NavigationStrategy::computeBestPath(
     MyPosition actualPos, 
-    std::vector<MyPosition>& currentPath, 
+    std::vector<MyPosition> currentPath, 
     std::vector<MyPosition>& bestPath, 
     int currentScore, 
-    int& maxScore, 
-    std::set<MyPosition>& visited
+    int& maxScore
 ) {
     if (navigationStack->hasNext()) {
         return;
     }
 
+    currentPath.push_back(actualPos);
+
     int depthRemaining = depthWalking - currentPath.size();
 
-    if (depthRemaining == 0 || isOutside(actualPos.getX(), actualPos.getY())) {
+    if (depthRemaining == 0) {
         if (currentScore > maxScore) {
             maxScore = currentScore;
             bestPath = currentPath; // Mise à jour du meilleur chemin
@@ -28,22 +29,16 @@ void NavigationStrategy::computeBestPath(
         return;
     }
 
-    MyPosition lastPos = (currentPath.empty()) ? MyPosition{-1, -1} : currentPath.back();
-    currentPath.push_back(actualPos);
-    visited.insert(actualPos);
-
     for (Direction dir : {LEFT, RIGHT, TOP, BOTTOM}) {
         MyPosition nextPos = getNextCase(dir, actualPos);
-        
-        if (isOutside(nextPos.getX(), nextPos.getY()) || (nextPos.getX() == lastPos.getX() && nextPos.getY() == lastPos.getY())) continue;
+        if (isOutside(nextPos.getX(), nextPos.getY())) continue;
 
         const bool isGoingThroughWall = goingThroughWall(dir, maze[actualPos.getX()][actualPos.getY()]);
-        int nextValue = valueOfMS(maze[nextPos.getX()][nextPos.getY()], isGoingThroughWall, visited);
+        int nextValue = valueOfMS(maze[nextPos.getX()][nextPos.getY()], isGoingThroughWall, currentPath);
 
-        computeBestPath(nextPos, currentPath, bestPath, currentScore + nextValue, maxScore, visited);
+        computeBestPath(nextPos, currentPath, bestPath, currentScore + nextValue, maxScore);
     }
 
-    visited.erase(actualPos);
     currentPath.pop_back();
 
     if (currentPath.empty()) { // Ça signifie qu'on est revenu à la racine (premier appel)
@@ -81,19 +76,19 @@ bool NavigationStrategy::isOutside(int x, int y)
                             mazeLength);
 }
 
-int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall, std::set<MyPosition>& visited)
+int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall, std::vector<MyPosition>& visited)
 {
     int score = 0;
 
     const int caseEquipe = -500;
-    const int caseNeutre = 100;
-    const int caseAdverse = 200;
+    const int caseNeutre = 200;
+    const int caseAdverse = 400;
 
     const int caseRoquette = 100;
     const int caseBorder = 200;
 
     const int caseDanger = -20;
-    const int caseGoingThrougWall = -3000;
+    const int caseGoingThrougWall = -1100;
 
     const int caseOustide = -1000000;
 
@@ -116,17 +111,20 @@ int NavigationStrategy::valueOfMS(const MazeSquare *ms, const bool throughWall, 
     {
         score += caseDanger;
     }
+
     /// si case est vide ++
-    if (ms->possession == 0)
-    {
-        score += caseNeutre;
-    } else if (ms->possession == gladiator->robot->getData().teamId || found) {
+    if (ms->possession == gladiator->robot->getData().teamId || found) {
         score += caseEquipe;
     }
+    else if (ms->possession == 0)
+    {
+        score += caseNeutre;
+    }  
     else
     {
         score += caseAdverse;
     }
+
     /// Si la case est sur le bord du maze
     if (isOnMazeBorder(ms->i, ms->j))
     {
